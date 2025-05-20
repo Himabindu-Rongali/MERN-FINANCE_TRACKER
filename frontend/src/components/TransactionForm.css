@@ -1,0 +1,232 @@
+/* TransactionForm.css */
+
+/* Container for the entire transaction form */
+.transaction-form-container {
+  font-family: 'Roboto', sans-serif;
+  padding: 30px;
+  border-radius: 16px;
+  max-width: 700px;
+  margin: 25px auto;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Light theme container */
+body:not(.dark) .transaction-form-container,
+.light .transaction-form-container {
+  background-color: #ffffff;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  border: 1px solid rgba(230, 230, 230, 0.7);
+}
+
+/* Dark theme container */
+body.dark .transaction-form-container,
+.dark .transaction-form-container {
+  background-color: #2a2a42;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(60, 60, 80, 0.7);
+}
+
+/* Transaction form styling */
+.transaction-form {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Form Labels */
+.transaction-form label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 500;
+  font-size: 16px;
+}
+
+/* Light theme labels */
+body:not(.dark) .transaction-form label,
+.light .transaction-form label {
+  color: #4c4c6c;
+}
+
+/* Dark theme labels */
+body.dark .transaction-form label,
+.dark .transaction-form label {
+  color: #e6e6e6;
+}
+
+/* Input styling */
+.transaction-form input,
+.transaction-form select {
+  width: 100%;
+  padding: 12px 15px;
+  border-radius: 8px;
+  font-size: 16px;
+  transition: all 0.3s ease;
+}
+
+/* Light theme inputs */
+body:not(.dark) .transaction-form input,
+body:not(.dark) .transaction-form select,
+.light .transaction-form input,
+.light .transaction-form select {
+  background-color: #f8f9fa;
+  border: 1px solid #ddd;
+  color: #333;
+}
+
+body:not(.dark) .transaction-form input:focus,
+body:not(.dark) .transaction-form select:focus,
+.light .transaction-form input:focus,
+.light .transaction-form select:focus {
+  border-color: #7f4c47;
+  box-shadow: 0 0 0 2px rgba(127, 76, 71, 0.2);
+  outline: none;
+}
+
+/* Dark theme inputs */
+body.dark .transaction-form input,
+body.dark .transaction-form select,
+.dark .transaction-form input,
+.dark .transaction-form select {
+  background-color: #333350;
+  border: 1px solid #444460;
+  color: #e6e6e6;
+}
+
+body.dark .transaction-form input:focus,
+body.dark .transaction-form select:focus,
+.dark .transaction-form input:focus,
+.dark .transaction-form select:focus {
+  border-color: #e6a070;
+  box-shadow: 0 0 0 2px rgba(230, 160, 112, 0.2);
+  outline: none;
+}
+
+/* Custom select styling for dark theme */
+body.dark .transaction-form select,
+.dark .transaction-form select {
+  appearance: none;
+  background-image: url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 5"%3E%3Cpath d="M0 0l5 5 5-5z" fill="%23e6a070"%3E%3C/path%3E%3C/svg%3E');
+  background-repeat: no-repeat;
+  background-position: right 15px center;
+  background-size: 12px 8px;
+  padding-right: 40px;
+}
+
+/* Custom select styling for light theme */
+body:not(.dark) .transaction-form select,
+.light .transaction-form select {
+  appearance: none;
+  background-image: url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 5"%3E%3Cpath d="M0 0l5 5 5-5z" fill="%237f4c47"%3E%3C/path%3E%3C/svg%3E');
+  background-repeat: no-repeat;
+  background-position: right 15px center;
+  background-size: 12px 8px;
+  padding-right: 40px;
+}
+
+/* Submit Button */
+.transaction-form button {
+  margin-top: 10px;
+  padding: 14px 20px;
+  font-size: 16px;
+  font-weight: 600;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  width: 200px;
+}
+
+/* Light theme button */
+body:not(.dark) .transaction-form button,
+.light .transaction-form button {
+  background-color: #7f4c47;
+  color: white;
+}
+
+body:not(.dark) .transaction-form button:hover,
+.light .transaction-form button:hover {
+  background-color: #694842;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Dark theme button */
+body.dark .transaction-form button,
+.dark .transaction-form button {
+  background-color: #e6a070;
+  color: #1a1a2e;
+}
+
+body.dark .transaction-form button:hover,
+.dark .transaction-form button:hover {
+  background-color: #d99060;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Success message styling */
+.success-message {
+  margin-top: 20px;
+  text-align: center;
+  padding: 12px;
+  border-radius: 8px;
+  animation: fadeOut 3s forwards;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+/* Light theme success message */
+body:not(.dark) .success-message,
+.light .success-message {
+  background-color: rgba(40, 167, 69, 0.1);
+  color: #28a745;
+  border: 1px solid rgba(40, 167, 69, 0.2);
+}
+
+/* Dark theme success message */
+body.dark .success-message,
+.dark .success-message {
+  background-color: rgba(40, 167, 69, 0.2);
+  color: #5cdb95;
+  border: 1px solid rgba(92, 219, 149, 0.3);
+}
+
+@keyframes fadeOut {
+  0% { opacity: 1; }
+  80% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+/* Form Section Title */
+.form-section-title {
+  margin: 0 0 20px;
+  text-align: center;
+  font-size: 24px;
+  font-weight: 700;
+}
+
+/* Light theme title */
+body:not(.dark) .form-section-title,
+.light .form-section-title {
+  color: #7f4c47;
+}
+
+/* Dark theme title */
+body.dark .form-section-title,
+.dark .form-section-title {
+  color: #e6a070;
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+  .transaction-form-container {
+    padding: 20px;
+    margin: 15px auto;
+  }
+  
+  .transaction-form button {
+    width: 100%;
+  }
+}

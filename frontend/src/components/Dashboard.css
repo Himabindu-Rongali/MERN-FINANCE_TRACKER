@@ -1,0 +1,324 @@
+/* General dashboard styles */
+.dashboard-container {
+  font-family: 'Arial', sans-serif;
+  padding: 20px;
+  border-radius: 10px;
+  max-width: 1200px;
+  margin: 30px auto;
+  transition: all 0.3s ease;
+}
+
+/* Light theme dashboard */
+body:not(.dark) .dashboard-container,
+.light .dashboard-container {
+  background-color: #f5f5f5;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Dark theme dashboard */
+body.dark .dashboard-container,
+.dark .dashboard-container {
+  background-color: #2a2a42;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.25);
+}
+
+/* Light theme balance */
+body:not(.dark) .total-balance,
+.light .total-balance {
+  font-size: 2rem;
+  font-weight: bold;
+  color: #4CAF50;
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+/* Dark theme balance */
+body.dark .total-balance,
+.dark .total-balance {
+  font-size: 2rem;
+  font-weight: bold;
+  color: #6ecd70;
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.category-breakdown {
+  margin-bottom: 30px;
+}
+
+/* Light theme category heading */
+body:not(.dark) .category-breakdown h3,
+.light .category-breakdown h3 {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 10px;
+}
+
+/* Dark theme category heading */
+body.dark .category-breakdown h3,
+.dark .category-breakdown h3 {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #e6a070;
+  margin-bottom: 10px;
+}
+
+/* Light theme category item */
+body:not(.dark) .category-item,
+.light .category-item {
+  font-size: 1.2rem;
+  margin: 5px 0;
+  color: #444;
+}
+
+/* Dark theme category item */
+body.dark .category-item,
+.dark .category-item {
+  font-size: 1.2rem;
+  margin: 5px 0;
+  color: #c2c2c2;
+}
+
+.total-transactions {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+/* Light theme transactions heading */
+body:not(.dark) .total-transactions h3,
+.light .total-transactions h3 {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #333;
+}
+
+/* Dark theme transactions heading */
+body.dark .total-transactions h3,
+.dark .total-transactions h3 {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #e6e6e6;
+}
+
+/* Button styles */
+.dashboard-buttons {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 30px;
+}
+
+/* Light theme dashboard button */
+body:not(.dark) .dashboard-button,
+.light .dashboard-button {
+  background-color: #7f4c47;
+  color: white;
+  font-size: 1rem;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  margin: 0 10px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+/* Dark theme dashboard button */
+body.dark .dashboard-button,
+.dark .dashboard-button {
+  background-color: #e6a070;
+  color: #1a1a2e;
+  font-size: 1rem;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  margin: 0 10px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+/* Light theme button hover */
+body:not(.dark) .dashboard-button:hover,
+.light .dashboard-button:hover {
+  background-color: #6a3f3b;
+  transform: translateY(-2px);
+  box-shadow: 0 3px 8px rgba(127, 76, 71, 0.3);
+}
+
+/* Dark theme button hover */
+body.dark .dashboard-button:hover,
+.dark .dashboard-button:hover {
+  background-color: #ff9776;
+  transform: translateY(-2px);
+  box-shadow: 0 3px 8px rgba(255, 151, 118, 0.3);
+}
+
+/* Chart container styles */
+.chart-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 400px;
+  position: relative;
+}
+
+.chart-container canvas {
+  max-width: 100% !important;
+  max-height: 100% !important;
+  height: auto;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  .dashboard-container {
+    padding: 15px;
+  }
+
+  .dashboard-button {
+    font-size: 0.9rem;
+    padding: 8px 16px;
+  }
+
+  .category-breakdown h3, .total-transactions h3 {
+    font-size: 1.2rem;
+  }
+
+  .total-balance {
+    font-size: 1.6rem;
+  }
+
+  .chart-container {
+    height: 300px;
+  }
+}
+.charts-row {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  margin-top: 20px;
+}
+
+.chart-wrapper {
+  width: 48%;
+  height: 400px;
+}
+/* Light theme totals */
+body:not(.dark) .selected-year-total, 
+body:not(.dark) .selected-month-total,
+.light .selected-year-total, 
+.light .selected-month-total {
+  margin-top: 10px;
+  font-weight: bold;
+  font-size: 18px;
+  text-align: center;
+  color: #333;
+}
+
+/* Dark theme totals */
+body.dark .selected-year-total,
+body.dark .selected-month-total,
+.dark .selected-year-total,
+.dark .selected-month-total {
+  margin-top: 10px;
+  font-weight: bold;
+  font-size: 18px;
+  text-align: center;
+  color: #e6e6e6;
+}
+
+/* Dark theme highlight text in selected month total */
+body.dark .selected-month-total h3,
+.dark .selected-month-total h3 {
+  color: #e6a070;
+}/* New styles for export dropdown */
+.export-dropdown {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 20px;
+}
+
+/* Light theme export select */
+body:not(.dark) .export-select,
+.light .export-select {
+  padding: 8px 12px;
+  font-size: 1rem;
+  border-radius: 5px;
+  margin-right: 10px;
+  cursor: pointer;
+  background-color: white;
+  color: #333;
+  border: 1px solid #ddd;
+}
+
+/* Dark theme export select */
+body.dark .export-select,
+.dark .export-select {
+  padding: 8px 12px;
+  font-size: 1rem;
+  border-radius: 5px;
+  margin-right: 10px;
+  cursor: pointer;
+  background-color: #252540;
+  color: #e0e0e0;
+  border: 1px solid #4a4a66;
+}
+
+/* Light theme export button */
+body:not(.dark) .export-button,
+.light .export-button {
+  padding: 8px 12px;
+  font-size: 1rem;
+  border-radius: 5px;
+  background-color: #7f4c47;
+  color: white;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+/* Dark theme export button */
+body.dark .export-button,
+.dark .export-button {
+  padding: 8px 12px;
+  font-size: 1rem;
+  border-radius: 5px;
+  background-color: #e6a070;
+  color: #1a1a2e;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+/* Light theme export button hover */
+body:not(.dark) .export-button:hover,
+.light .export-button:hover {
+  background-color: #6a3f3b;
+  transform: translateY(-2px);
+  box-shadow: 0 3px 8px rgba(127, 76, 71, 0.3);
+}
+
+/* Dark theme export button hover */
+body.dark .export-button:hover,
+.dark .export-button:hover {
+  background-color: #ff9776;
+  transform: translateY(-2px);
+  box-shadow: 0 3px 8px rgba(255, 151, 118, 0.3);
+}
+
+body:not(.dark) .export-button:disabled,
+.light .export-button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+body.dark .export-button:disabled,
+.dark .export-button:disabled {
+  background-color: #555;
+  color: #999;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
