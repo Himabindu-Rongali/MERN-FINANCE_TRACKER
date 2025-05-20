@@ -87,7 +87,7 @@ const TransactionForm = ({ refreshTransactions, handleAddTransaction }) => {
           </select>
         </label>
         
-        <div style={{ textAlign: 'center' }}>
+        <div>
           <button type="submit">Add Transaction</button>
         </div>
       </form>

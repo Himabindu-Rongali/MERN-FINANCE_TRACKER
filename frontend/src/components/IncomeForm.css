@@ -1,0 +1,186 @@
+/* Income Form styles */
+.income-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1.5rem;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+/* Light theme form */
+body:not(.dark) .income-form,
+.light .income-form {
+  background-color: #f9f9f9;
+  border: 1px solid #ccc;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+/* Dark theme form */
+body.dark .income-form,
+.dark .income-form {
+  background-color: #333350;
+  border: 1px solid #444460;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* Form title */
+.income-form-title {
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+/* Light theme form title */
+body:not(.dark) .income-form-title,
+.light .income-form-title {
+  color: brown;
+}
+
+/* Dark theme form title */
+body.dark .income-form-title,
+.dark .income-form-title {
+  color: #e6a070;
+}
+
+/* Input fields */
+.income-input {
+  padding: 12px;
+  font-size: 1rem;
+  border-radius: 6px;
+  width: 100%;
+  transition: all 0.3s ease;
+}
+
+/* Light theme inputs */
+body:not(.dark) .income-input,
+.light .income-input {
+  background-color: #ffffff;
+  border: 1px solid #ccc;
+  color: #333;
+}
+
+/* Dark theme inputs */
+body.dark .income-input,
+.dark .income-input {
+  background-color: #2a2a42;
+  border: 1px solid #444460;
+  color: #e6e6e6;
+}
+
+/* Input focus states */
+.income-input:focus {
+  outline: none;
+}
+
+/* Light theme input focus */
+body:not(.dark) .income-input:focus,
+.light .income-input:focus {
+  border-color: brown;
+  box-shadow: 0 0 0 2px rgba(165, 42, 42, 0.2);
+}
+
+/* Dark theme input focus */
+body.dark .income-input:focus,
+.dark .income-input:focus {
+  border-color: #e6a070;
+  box-shadow: 0 0 0 2px rgba(230, 160, 112, 0.3);
+}
+
+/* Submit button */
+.income-submit-button {
+  padding: 12px;
+  font-size: 1rem;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  margin-top: 0.5rem;
+}
+
+/* Light theme submit button */
+body:not(.dark) .income-submit-button,
+.light .income-submit-button {
+  background-color: brown;
+  color: white;
+}
+
+/* Dark theme submit button */
+body.dark .income-submit-button,
+.dark .income-submit-button {
+  background-color: #e6a070;
+  color: #2a2a42;
+}
+
+/* Button hover effects */
+.income-submit-button:hover {
+  transform: translateY(-2px);
+}
+
+/* Light theme button hover */
+body:not(.dark) .income-submit-button:hover,
+.light .income-submit-button:hover {
+  background-color: #8b0000;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+/* Dark theme button hover */
+body.dark .income-submit-button:hover,
+.dark .income-submit-button:hover {
+  background-color: #f0b88e;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.4);
+}
+
+/* Form label */
+.income-label {
+  font-weight: 600;
+  margin-bottom: 0.3rem;
+  display: block;
+}
+
+/* Light theme label */
+body:not(.dark) .income-label,
+.light .income-label {
+  color: #555;
+}
+
+/* Dark theme label */
+body.dark .income-label,
+.dark .income-label {
+  color: #c2c2c2;
+}
+
+/* Cancel button */
+.income-cancel-button {
+  padding: 10px;
+  font-size: 0.9rem;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  background-color: transparent;
+  text-align: center;
+  margin-top: 1rem;
+}
+
+/* Light theme cancel button */
+body:not(.dark) .income-cancel-button,
+.light .income-cancel-button {
+  color: #888;
+}
+
+/* Dark theme cancel button */
+body.dark .income-cancel-button,
+.dark .income-cancel-button {
+  color: #a0a0a0;
+}
+
+/* Cancel button hover */
+.income-cancel-button:hover {
+  text-decoration: underline;
+}
+
+/* Form group */
+.income-form-group {
+  margin-bottom: 1rem;
+}

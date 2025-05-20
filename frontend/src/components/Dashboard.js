@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 import { Line, Pie } from 'react-chartjs-2';
 import {
@@ -12,6 +12,7 @@ import {
   LineElement,
   PointElement
 } from 'chart.js';
+import { ThemeContext } from './ThemeContext';
 import './Dashboard.css';
 
 ChartJS.register(
@@ -29,6 +30,7 @@ const Dashboard = ({ transactions }) => {
   const currentDate = new Date();
   const currentYear = currentDate.getFullYear();
   const currentMonth = currentDate.getMonth();
+  const { theme } = useContext(ThemeContext);
 
   const [incomes, setIncomes] = useState([]);
   const [selectedView, setSelectedView] = useState('withinYear');
@@ -110,7 +112,103 @@ const Dashboard = ({ transactions }) => {
         const date = income.date;
         return date.getFullYear() === parseInt(selectedYear) && date.getMonth() === parseInt(selectedMonth);
       }).reduce((acc, income) => acc + income.amount, 0)
-    : 0;
+    : 0;  // Chart options based on theme
+  const getChartOptions = () => {
+    return {
+      maintainAspectRatio: false,
+      scales: {
+        x: {
+          ticks: {
+            color: theme === 'dark' ? '#e6e6e6' : '#333',
+            font: {
+              size: 12,
+              weight: 'bold'
+            }
+          },
+          grid: {
+            color: theme === 'dark' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'
+          }
+        },
+        y: {
+          ticks: {
+            color: theme === 'dark' ? '#e6e6e6' : '#333',
+            font: {
+              size: 12,
+              weight: 'bold'
+            }
+          },
+          grid: {
+            color: theme === 'dark' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'
+          }
+        }
+      },
+      plugins: {
+        legend: {
+          labels: {
+            color: theme === 'dark' ? '#e6e6e6' : '#333',
+            font: {
+              size: 14,
+              weight: 'bold'
+            },
+            usePointStyle: true,
+            padding: 20
+          }
+        },
+        tooltip: {
+          backgroundColor: theme === 'dark' ? 'rgba(42, 42, 66, 0.9)' : 'rgba(255, 255, 255, 0.9)',
+          titleColor: theme === 'dark' ? '#e6a070' : '#7f4c47',
+          bodyColor: theme === 'dark' ? '#e6e6e6' : '#333',
+          borderColor: theme === 'dark' ? '#444460' : '#ddd',
+          borderWidth: 1,
+          padding: 12,
+          titleFont: {
+            size: 16,
+            weight: 'bold'
+          },
+          bodyFont: {
+            size: 14
+          },
+          displayColors: true,
+          boxPadding: 5
+        }
+      }
+    };
+  };
+
+  // Pie chart options
+  const getPieOptions = () => {
+    return {
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          position: 'right',
+          labels: {
+            color: theme === 'dark' ? '#e6e6e6' : '#333',
+            font: {
+              size: 14,
+              weight: 'bold'
+            },
+            padding: 15
+          }
+        },
+        tooltip: {
+          backgroundColor: theme === 'dark' ? 'rgba(42, 42, 66, 0.9)' : 'rgba(255, 255, 255, 0.9)',
+          titleColor: theme === 'dark' ? '#e6a070' : '#7f4c47',
+          bodyColor: theme === 'dark' ? '#e6e6e6' : '#333',
+          borderColor: theme === 'dark' ? '#444460' : '#ddd',
+          borderWidth: 1,
+          padding: 12,
+          titleFont: {
+            size: 16,
+            weight: 'bold'
+          },
+          bodyFont: {
+            size: 14
+          }
+        }
+      }
+    };
+  };
 
   const yearChartData = {
     labels: Object.keys(yearlyTotals),
@@ -120,13 +218,16 @@ const Dashboard = ({ transactions }) => {
       fill: false,
       borderColor: '#FF9F40',
       tension: 0.2,
-      pointBackgroundColor: '#fff',
+      pointBackgroundColor: theme === 'dark' ? '#2a2a42' : '#fff',
       pointBorderColor: '#FF9F40',
       borderWidth: 2,
+      pointHoverRadius: 6,
+      pointHoverBackgroundColor: theme === 'dark' ? '#e6a070' : '#fff',
+      pointHoverBorderColor: '#FF9F40',
+      pointHoverBorderWidth: 3,
+      pointRadius: 5,
     }],
-  };
-
-  const monthChartData = selectedYear ? {
+  };  const monthChartData = selectedYear ? {
     labels: months,
     datasets: [{
       label: `Spending in ${selectedYear}`,
@@ -134,12 +235,16 @@ const Dashboard = ({ transactions }) => {
       fill: false,
       borderColor: '#4CAF50',
       tension: 0.2,
-      pointBackgroundColor: '#fff',
+      pointBackgroundColor: theme === 'dark' ? '#2a2a42' : '#fff',
       pointBorderColor: '#4CAF50',
       borderWidth: 2,
+      pointHoverRadius: 6,
+      pointHoverBackgroundColor: theme === 'dark' ? '#e6a070' : '#fff',
+      pointHoverBorderColor: '#4CAF50',
+      pointHoverBorderWidth: 3,
+      pointRadius: 5,
     }],
   } : null;
-
   const categoryChartData = (selectedYear && selectedMonth !== '') ? (() => {
     const categoryTotals = categoryTotalsForMonth(selectedYear, selectedMonth);
     return {
@@ -147,6 +252,11 @@ const Dashboard = ({ transactions }) => {
       datasets: [{
         data: Object.values(categoryTotals),
         backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#FF9F40', '#FF6F61'],
+        borderColor: theme === 'dark' ? '#2a2a42' : '#fff',
+        borderWidth: 2,
+        hoverBorderColor: theme === 'dark' ? '#e6e6e6' : '#333',
+        hoverBorderWidth: 3,
+        hoverOffset: 10,
       }]
     };
   })() : null;
@@ -161,12 +271,10 @@ const Dashboard = ({ transactions }) => {
         <button className="dashboard-button" onClick={() => { setSelectedView('withinYear'); setSelectedYear(currentYear.toString()); setSelectedMonth(currentMonth.toString()); }}>
           Within a Year Progress
         </button>
-      </div>
-
-      {/* Yearly Progress */}
+      </div>      {/* Yearly Progress */}
       {selectedView === 'yearly' && (
         <div className="chart-container">
-          <Line data={yearChartData} options={{ maintainAspectRatio: false }} />
+          <Line data={yearChartData} options={getChartOptions()} />
         </div>
       )}
 
@@ -207,14 +315,13 @@ const Dashboard = ({ transactions }) => {
 
           {/* Charts */}
           {selectedYear && (
-            <div className="charts-row">
-              <div className="chart-wrapper">
-                <Line data={monthChartData} options={{ maintainAspectRatio: false }} />
+            <div className="charts-row">              <div className="chart-wrapper">
+                <Line data={monthChartData} options={getChartOptions()} />
               </div>
 
               {selectedMonth !== '' && categoryChartData && (
                 <div className="chart-wrapper">
-                  <Pie data={categoryChartData} options={{ maintainAspectRatio: false }} />
+                  <Pie data={categoryChartData} options={getPieOptions()} />
                 </div>
               )}
             </div>

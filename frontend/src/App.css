@@ -323,29 +323,30 @@ li button:hover {
 }
 
 .success-message {
-  color: green;
-  font-size: 1.9rem;
-  padding: 10px;
-  border-radius: 5px;
+  color: #4CAF50;
+  font-size: 1.2rem;
+  padding: 15px;
+  border-radius: 8px;
   margin-top: 20px;
   text-align: center;
-  position: absolute;
-  bottom: -10px;
-  left: 0;
   width: 100%;
   z-index: 10;
   animation: fadeOut 3s forwards;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
 @keyframes fadeOut {
   0% {
     opacity: 1;
+    transform: translateY(0);
   }
   80% {
     opacity: 1;
+    transform: translateY(0);
   }
   100% {
     opacity: 0;
+    transform: translateY(-10px);
   }
 }
 

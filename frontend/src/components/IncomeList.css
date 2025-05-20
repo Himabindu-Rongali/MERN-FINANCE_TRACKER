@@ -1,0 +1,270 @@
+/* Income list container */
+.income-container {
+  max-width: 800px;
+  margin: 2rem auto;
+  padding: 1.5rem;
+  font-family: 'Arial', sans-serif;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+/* Light theme container */
+body:not(.dark) .income-container,
+.light .income-container {
+  background-color: #fff;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Dark theme container */
+body.dark .income-container,
+.dark .income-container {
+  background-color: #2a2a42;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+}
+
+/* Heading styles */
+.income-heading {
+  font-size: 2rem;
+  margin-bottom: 1.5rem;
+  text-align: center;
+  border-bottom: 2px solid;
+  padding-bottom: 0.5rem;
+}
+
+/* Light theme heading */
+body:not(.dark) .income-heading,
+.light .income-heading {
+  color: brown;
+  border-bottom-color: #eee;
+}
+
+/* Dark theme heading */
+body.dark .income-heading,
+.dark .income-heading {
+  color: #e6a070;
+  border-bottom-color: #3a3a52;
+}
+
+/* Success message */
+.income-success-message {
+  padding: 0.75rem;
+  border-radius: 6px;
+  margin-bottom: 1.5rem;
+  font-weight: bold;
+  text-align: center;
+  transition: all 0.3s ease;
+}
+
+/* Light theme success message */
+body:not(.dark) .income-success-message,
+.light .income-success-message {
+  background-color: rgba(40, 167, 69, 0.1);
+  color: #28a745;
+  border: 1px solid rgba(40, 167, 69, 0.2);
+}
+
+/* Dark theme success message */
+body.dark .income-success-message,
+.dark .income-success-message {
+  background-color: rgba(40, 167, 69, 0.2);
+  color: #5cdb95;
+  border: 1px solid rgba(92, 219, 149, 0.3);
+}
+
+/* Add button container */
+.income-add-btn-container {
+  text-align: center;
+  margin-top: 2rem;
+}
+
+/* Add button */
+.income-add-button {
+  padding: 10px 20px;
+  font-size: 1rem;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+/* Light theme add button */
+body:not(.dark) .income-add-button,
+.light .income-add-button {
+  background-color: brown;
+  color: #fff;
+}
+
+/* Dark theme add button */
+body.dark .income-add-button,
+.dark .income-add-button {
+  background-color: #e6a070;
+  color: #2a2a42;
+}
+
+/* Button hover effect */
+.income-add-button:hover {
+  transform: translateY(-2px);
+}
+
+/* Light theme button hover */
+body:not(.dark) .income-add-button:hover,
+.light .income-add-button:hover {
+  background-color: #a52a2a;
+}
+
+/* Dark theme button hover */
+body.dark .income-add-button:hover,
+.dark .income-add-button:hover {
+  background-color: #f0b88e;
+}
+
+/* Form container */
+.income-form-container {
+  margin-top: 1.5rem;
+}
+
+/* No data message */
+.income-no-data {
+  font-style: italic;
+  text-align: center;
+  padding: 1rem;
+}
+
+/* Light theme no data */
+body:not(.dark) .income-no-data,
+.light .income-no-data {
+  color: #999;
+}
+
+/* Dark theme no data */
+body.dark .income-no-data,
+.dark .income-no-data {
+  color: #a0a0a0;
+}
+
+/* Income list */
+.income-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* Income card */
+.income-card {
+  padding: 1rem;
+  border-radius: 6px;
+  transition: 0.3s ease;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* Light theme income card */
+body:not(.dark) .income-card,
+.light .income-card {
+  background-color: #f4f6f8;
+  border: 1px solid #ddd;
+}
+
+/* Dark theme income card */
+body.dark .income-card,
+.dark .income-card {
+  background-color: #333350;
+  border: 1px solid #444460;
+}
+
+/* Amount display */
+.income-amount {
+  font-weight: bold;
+  font-size: 1.2rem;
+}
+
+/* Light theme amount */
+body:not(.dark) .income-amount,
+.light .income-amount {
+  color: #4CAF50;
+}
+
+/* Dark theme amount */
+body.dark .income-amount,
+.dark .income-amount {
+  color: #6ecd70;
+}
+
+/* Details container */
+.income-details {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+/* Light theme details */
+body:not(.dark) .income-details,
+.light .income-details {
+  color: #555;
+}
+
+/* Dark theme details */
+body.dark .income-details,
+.dark .income-details {
+  color: #c2c2c2;
+}
+
+/* Date display */
+.income-date {
+  font-size: 0.9rem;
+  margin-top: 4px;
+}
+
+/* Light theme date */
+body:not(.dark) .income-date,
+.light .income-date {
+  color: #888;
+}
+
+/* Dark theme date */
+body.dark .income-date,
+.dark .income-date {
+  color: #a0a0a0;
+}
+
+/* Delete button */
+.income-delete-button {
+  padding: 6px 12px;
+  font-size: 0.9rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: 0.3s ease;
+}
+
+/* Light theme delete button */
+body:not(.dark) .income-delete-button,
+.light .income-delete-button {
+  background-color: #f44336;
+  color: white;
+}
+
+/* Dark theme delete button */
+body.dark .income-delete-button,
+.dark .income-delete-button {
+  background-color: #c62828;
+  color: white;
+}
+
+/* Delete button hover */
+.income-delete-button:hover {
+  transform: scale(1.05);
+}
+
+/* Light theme delete button hover */
+body:not(.dark) .income-delete-button:hover,
+.light .income-delete-button:hover {
+  background-color: #e53935;
+}
+
+/* Dark theme delete button hover */
+body.dark .income-delete-button:hover,
+.dark .income-delete-button:hover {
+  background-color: #d32f2f;
+}

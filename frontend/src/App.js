@@ -58,8 +58,6 @@ const AppContent = () => {
         </div>
       </nav>
 
-      {successMessage && <div className="success-message">{successMessage}</div>}
-
       <Routes>
         <Route path="/" element={
           <div className={`home-page ${theme}`}>
@@ -68,6 +66,7 @@ const AppContent = () => {
               refreshTransactions={fetchTransactions}
               handleAddTransaction={handleAddTransaction}
             />
+            {successMessage && <div className="success-message">{successMessage}</div>}
           </div>
         } />
         <Route path="/transactions" element={

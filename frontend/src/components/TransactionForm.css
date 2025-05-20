@@ -175,6 +175,10 @@ body.dark .transaction-form button:hover,
   animation: fadeOut 3s forwards;
   font-size: 16px;
   font-weight: 600;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+  margin-bottom: 30px;
 }
 
 /* Light theme success message */
@@ -183,6 +187,7 @@ body:not(.dark) .success-message,
   background-color: rgba(40, 167, 69, 0.1);
   color: #28a745;
   border: 1px solid rgba(40, 167, 69, 0.2);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
 }
 
 /* Dark theme success message */
@@ -191,6 +196,7 @@ body.dark .success-message,
   background-color: rgba(40, 167, 69, 0.2);
   color: #5cdb95;
   border: 1px solid rgba(92, 219, 149, 0.3);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
 }
 
 @keyframes fadeOut {

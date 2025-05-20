@@ -1,8 +1,11 @@
 // src/components/IncomeForm.js
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import axios from 'axios';
+import { ThemeContext } from './ThemeContext';
+import './IncomeForm.css';
 
 const IncomeForm = ({ onSuccess }) => {
+  const { theme } = useContext(ThemeContext);
   const [source, setSource] = useState('');
   const [amount, setAmount] = useState('');
   const [date, setDate] = useState('');
@@ -23,63 +26,50 @@ const IncomeForm = ({ onSuccess }) => {
       console.error('Error adding income:', error);
     }
   };
-
   return (
-    <form onSubmit={handleSubmit} style={styles.form}>
+    <form onSubmit={handleSubmit} className={`income-form ${theme}`}>
+      <h3 className="income-form-title">Add New Income</h3>
       
-      <input
-        type="number"
-        placeholder="Amount"
-        value={amount}
-        onChange={(e) => setAmount(e.target.value)}
-        required
-        style={styles.input}
-      />
-      <input
-        type="text"
-        placeholder="Source"
-        value={source}
-        onChange={(e) => setSource(e.target.value)}
-        required
-        style={styles.input}
-      />
-      <input
-        type="date"
-        value={date}
-        onChange={(e) => setDate(e.target.value)}
-        required
-        style={styles.input}
-      />
-      <button type="submit" style={styles.button}>Add Income</button>
+      <div className="income-form-group">
+        <label className="income-label">Amount</label>
+        <input
+          type="number"
+          placeholder="Enter amount"
+          value={amount}
+          onChange={(e) => setAmount(e.target.value)}
+          required
+          className="income-input"
+        />
+      </div>
+      
+      <div className="income-form-group">
+        <label className="income-label">Source</label>
+        <input
+          type="text"
+          placeholder="e.g., Salary, Freelance, Investment"
+          value={source}
+          onChange={(e) => setSource(e.target.value)}
+          required
+          className="income-input"
+        />
+      </div>
+      
+      <div className="income-form-group">
+        <label className="income-label">Date</label>
+        <input
+          type="date"
+          value={date}
+          onChange={(e) => setDate(e.target.value)}
+          required
+          className="income-input"
+        />
+      </div>
+      
+      <button type="submit" className="income-submit-button">Add Income</button>
     </form>
   );
 };
 
-const styles = {
-  form: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '1rem',
-    padding: '1rem',
-    backgroundColor: '#f9f9f9',
-    borderRadius: '6px',
-    border: '1px solid #ccc'
-  },
-  input: {
-    padding: '10px',
-    fontSize: '1rem',
-    borderRadius: '4px',
-    border: '1px solid #ccc'
-  },
-  button: {
-    padding: '10px',
-    backgroundColor: 'brown',
-    color: '#fff',
-    border: 'none',
-    borderRadius: '6px',
-    fontSize: '1rem',
-    cursor: 'pointer'
-  }
-};
+// Styles moved to IncomeForm.css
 
 export default IncomeForm;
