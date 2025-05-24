@@ -12,6 +12,7 @@ import Login from './components/Login';
 import Register from './components/Register';
 import { AuthProvider, AuthContext } from './context/AuthContext';
 import ProfileDropdown from './components/ProfileDropdown';
+import ForgotPassword from './components/ForgotPassword';
 
 import './App.css';
 
@@ -95,6 +96,7 @@ const AppContent = () => {
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route 
           path="/" 
           element={

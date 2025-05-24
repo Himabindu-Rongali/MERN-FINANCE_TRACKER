@@ -3,8 +3,9 @@ const mongoose = require('mongoose');
 const UserSchema = new mongoose.Schema({
   username: {
     type: String,
+    required: false, // Username is not required at registration
     unique: true,
-    sparse: true, // Allows null/undefined values not to be unique, but if a value exists, it must be unique.
+    sparse: true, // Allows multiple documents to have null for username, but unique if not null
     trim: true,
     minlength: 3 // Optional: enforce a minimum length for usernames
   },
@@ -22,6 +23,15 @@ const UserSchema = new mongoose.Schema({
     type: Date,
     default: Date.now
   }
+  // resetPasswordToken and resetPasswordExpires are no longer needed for the simplified flow
+  // resetPasswordToken: {
+  //   type: String,
+  //   required: false
+  // },
+  // resetPasswordExpires: {
+  //   type: Date,
+  //   required: false
+  // }
 });
 
 module.exports = mongoose.model('User', UserSchema);

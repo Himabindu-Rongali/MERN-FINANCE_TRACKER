@@ -1,6 +1,6 @@
 import React, { useState, useContext } from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext'; // Uncomment and use AuthContext
 import './Login.css';
 import { ThemeContext } from './ThemeContext';
@@ -54,9 +54,12 @@ const Login = () => {
             required
           />
         </div>
-        <button type="submit">Login</button>
-        <p>
-          Don't have an account? <a href="/register">Register here</a>
+        <button type="submit" className="login-button">Login</button>
+        <p className="register-link">
+          Don't have an account? <Link to="/register">Register here</Link>
+        </p>
+        <p className="forgot-password-link">
+          <Link to="/forgot-password">Forgot Password?</Link>
         </p>
       </form>
     </div>

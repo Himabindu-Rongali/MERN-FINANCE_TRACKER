@@ -226,4 +226,42 @@ router.put('/username',
   }
 );
 
+// @route   POST api/auth/forgot-password
+// @desc    Reset password directly (simplified flow)
+// @access  Public
+router.post('/forgot-password', [
+  check('email', 'Please include a valid email').isEmail(),
+  check('newPassword', 'New password must be 6 or more characters').isLength({ min: 6 })
+], async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+
+  const { email, newPassword } = req.body;
+
+  try {
+    let user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(404).json({ msg: 'User with this email not found.' });
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    user.password = await bcrypt.hash(newPassword, salt);
+
+    // Clear any old reset tokens if they exist (good practice, though not strictly needed for this flow anymore)
+    user.resetPasswordToken = undefined;
+    user.resetPasswordExpires = undefined;
+
+    await user.save();
+
+    res.status(200).json({ msg: 'Password has been reset successfully.' });
+
+  } catch (err) {
+    console.error('Error in /forgot-password (direct reset) route:', err.message);
+    res.status(500).send('Server error during password reset process');
+  }
+});
+
 module.exports = router;
