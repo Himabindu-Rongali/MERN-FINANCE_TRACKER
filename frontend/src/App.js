@@ -11,15 +11,15 @@ import { ThemeProvider, ThemeContext } from './components/ThemeContext';
 import Login from './components/Login';
 import Register from './components/Register';
 import { AuthProvider, AuthContext } from './context/AuthContext';
+import ProfileDropdown from './components/ProfileDropdown';
 
 import './App.css';
 
-// A wrapper for routes that require authentication
 const PrivateRoute = ({ children }) => {
   const { isAuthenticated, loading } = useContext(AuthContext);
 
   if (loading) {
-    return <div>Loading...</div>; // Or a spinner component
+    return <div>Loading...</div>;
   }
 
   return isAuthenticated() ? children : <Navigate to="/login" />;
@@ -29,7 +29,7 @@ const AppContent = () => {
   const [transactions, setTransactions] = useState([]);
   const [successMessage, setSuccessMessage] = useState('');
   const { theme } = useContext(ThemeContext);
-  const { isAuthenticated, logout, user, token } = useContext(AuthContext); // Added token
+  const { isAuthenticated, token } = useContext(AuthContext);
 
   const fetchTransactions = async () => {
     try {
@@ -37,6 +37,7 @@ const AppContent = () => {
       setTransactions(res.data);
     } catch (error) {
       console.error('Error fetching transactions:', error);
+      setTransactions([]);
     }
   };
 
@@ -56,19 +57,17 @@ const AppContent = () => {
   };
 
   useEffect(() => {
-    if (isAuthenticated()) {
+    if (token) {
       fetchTransactions();
+    } else {
+      setTransactions([]);
     }
-    // Clear transactions if not authenticated (e.g., after logout)
-    if (!isAuthenticated()) {
-        setTransactions([]);
-    }
-  }, [isAuthenticated, token]); // Changed dependency to isAuthenticated (function reference) and token
+  }, [token]);
 
   return (
     <div className={`app-container ${theme}`}>
       <nav className="navbar">
-        <div className="right-side-nav">
+        <div className="navbar-content-right">
           <div className="nav-links">
             <Link to="/" className="nav-link">Home</Link>
             {isAuthenticated() && (
@@ -79,17 +78,17 @@ const AppContent = () => {
               </>
             )}
           </div>
-          <div className="auth-links">
+          <div className="nav-auth-controls">
             {isAuthenticated() ? (
-              <button onClick={logout} className="nav-link button-link">Logout</button>
+              <ProfileDropdown />
             ) : (
-              <>
+              <div className="auth-links-group">
                 <Link to="/login" className="nav-link">Login</Link>
                 <Link to="/register" className="nav-link">Register</Link>
-              </>
+              </div>
             )}
+            <ThemeToggle />
           </div>
-          <ThemeToggle />
         </div>
       </nav>
 

@@ -1,7 +1,7 @@
 import React, { useState, useContext } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-// import { AuthContext } from '../context/AuthContext'; // Assuming you'll create an AuthContext
+import { AuthContext } from '../context/AuthContext'; // Uncomment and use AuthContext
 import './Login.css';
 import { ThemeContext } from './ThemeContext';
 
@@ -10,7 +10,7 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const navigate = useNavigate();
-  // const { login } = useContext(AuthContext); // Placeholder for AuthContext
+  const { login } = useContext(AuthContext); // Use login from AuthContext
   const { theme } = useContext(ThemeContext);
 
   const handleSubmit = async (e) => {
@@ -18,12 +18,14 @@ const Login = () => {
     setError('');
     try {
       const res = await axios.post('http://localhost:5000/api/auth/login', { email, password });
-      // login(res.data.token); // Placeholder for AuthContext action
-      localStorage.setItem('token', res.data.token); // Store token
-      axios.defaults.headers.common['Authorization'] = `Bearer ${res.data.token}`;
-      navigate('/'); // Redirect to dashboard or home page
+      // Call the login function from AuthContext. This will handle token storage, 
+      // user fetching, and updating context state.
+      await login(res.data.token); 
+      navigate('/'); // Redirect after successful context login and user fetch
     } catch (err) {
-      setError(err.response?.data?.msg || 'Failed to login. Please check your credentials.');
+      // AuthContext's login function might re-throw an error if user fetch fails.
+      // Or, the initial axios.post might fail.
+      setError(err.response?.data?.msg || err.message || 'Failed to login. Please check your credentials.');
     }
   };
 

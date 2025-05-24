@@ -273,7 +273,7 @@ li button:hover {
 /* Navbar */
 .navbar {
   display: flex;
-  justify-content: flex-end; /* Changed from space-between to flex-end */
+  justify-content: flex-end; /* Push all content to the right */
   align-items: center;
   padding: 1rem 2rem; /* Increased padding */
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Softer shadow */
@@ -281,6 +281,30 @@ li button:hover {
   top: 0;
   z-index: 1000; /* Ensure navbar stays on top */
   transition: background-color 0.3s ease, color 0.3s ease; /* Smooth transition for theme changes */
+}
+
+.navbar-content-right { /* Container for all navbar items */
+  display: flex;
+  align-items: center;
+  gap: 1rem; /* Space between logical groups (links, auth/theme) */
+}
+
+.nav-links { /* Group for navigation links */
+  display: flex;
+  align-items: center;
+  gap: 0.5rem; /* Space between individual nav links */
+}
+
+.nav-auth-controls { /* Group for auth elements (ProfileDropdown or Login/Register) and ThemeToggle */
+  display: flex;
+  align-items: center;
+  gap: 1rem; /* Space between ProfileDropdown/AuthLinks and ThemeToggle */
+}
+
+.auth-links-group { /* Specific group for Login/Register links when user is not authenticated */
+  display: flex;
+  align-items: center;
+  gap: 0.5rem; /* Space between Login and Register links */
 }
 
 /* Light theme navbar */
@@ -295,6 +319,12 @@ li button:hover {
   padding: 0.5rem 0.75rem; /* Add padding to links */
   border-radius: 4px; /* Rounded corners for links on hover/active */
   transition: background-color 0.2s ease, color 0.2s ease;
+  text-decoration: none; /* Ensure links don't have underlines by default */
+  margin-right: 0.5rem; /* Add some space between nav links */
+}
+
+.light .nav-link:last-child {
+  margin-right: 0;
 }
 
 .light .nav-link:hover,
@@ -319,45 +349,32 @@ li button:hover {
 
 /* Dark theme navbar */
 .dark .navbar {
-  background-color: #2c3e50; /* Darker, more distinct background for dark theme */
-  border-bottom: 1px solid #34495e; /* Subtle border for dark theme */
+  background-color: #1a1a2e; /* Darker, more distinct background for dark theme */
+  border-bottom: 1px solid #333; /* Dark theme border */
 }
 
 .dark .nav-link {
-  color: #ecf0f1; /* Lighter link color for dark theme */
+  color: #e6e6e6; /* Light link color for dark theme */
   font-weight: 500;
   padding: 0.5rem 0.75rem;
   border-radius: 4px;
   transition: background-color 0.2s ease, color 0.2s ease;
+  text-decoration: none;
+  margin-right: 0.5rem;
+}
+
+.dark .nav-link:last-child {
+  margin-right: 0;
 }
 
 .dark .nav-link:hover,
 .dark .nav-link.active {
-  background-color: #34495e;
-  color: #3498db;
-}
-
-.dark .button-link {
-  color: #3498db;
-  font-weight: 500;
-  padding: 0.5rem 0.75rem;
-  border-radius: 4px;
-  transition: background-color 0.2s ease, color 0.2s ease;
-}
-
-.dark .button-link:hover {
-  background-color: #34495e;
-  color: #2980b9;
+  background-color: #3a3a52; /* Darker background on hover/active */
+  color: #90caf9; /* Lighter blue for active/hover link in dark mode */
 }
 
 
 /* General Navbar structure adjustments - these were mostly fine */
-.right-side-nav {
-  display: flex;
-  align-items: center;
-  gap: 20px;
-}
-
 .nav-content { /* This div was added in App.js, ensure it takes full width and uses flex */
   display: flex;
   justify-content: space-between;
@@ -409,14 +426,6 @@ li button:hover {
   font-size: 0.9em;
   color: #6c757d; /* Example email color */
 }
-
-.auth-links {
-  display: flex; 
-  align-items: center;
-  /* margin-right: 1rem; */ /* Replaced by gap in .right-side-nav */
-}
-
-/* Add or adjust other styles as needed */
 
 /* Ensure app-container takes up viewport height if navbar is fixed or sticky */
 .app-container {
