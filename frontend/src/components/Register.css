@@ -1,0 +1,118 @@
+.register-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 80vh;
+    padding: 20px;
+  }
+  
+  .register-form {
+    background-color: #fff;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 400px;
+    text-align: center;
+  }
+  
+  .register-form h2 {
+    margin-bottom: 20px;
+    color: #333;
+  }
+  
+  .register-form div {
+    margin-bottom: 15px;
+    text-align: left;
+  }
+  
+  .register-form label {
+    display: block;
+    margin-bottom: 5px;
+    color: #555;
+    font-weight: bold;
+  }
+  
+  .register-form input[type="email"],
+  .register-form input[type="password"] {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-sizing: border-box;
+    font-size: 16px;
+  }
+  
+  .register-form button {
+    width: 100%;
+    padding: 12px;
+    background-color: #28a745; /* Green color for register */
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s ease;
+  }
+  
+  .register-form button:hover {
+    background-color: #218838;
+  }
+  
+  .register-form p {
+    margin-top: 20px;
+    color: #555;
+  }
+  
+  .register-form p a {
+    color: #007bff;
+    text-decoration: none;
+  }
+  
+  .register-form p a:hover {
+    text-decoration: underline;
+  }
+  
+  .error-message {
+    color: red;
+    margin-bottom: 15px;
+    font-size: 0.9em;
+  }
+  
+  .success-message {
+    color: green;
+    margin-bottom: 15px;
+    font-size: 0.9em;
+  }
+  
+  /* Dark Theme Adjustments */
+  .register-container.dark .register-form {
+    background-color: #333;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+  }
+  
+  .register-container.dark .register-form h2,
+  .register-container.dark .register-form label,
+  .register-container.dark .register-form p {
+    color: #f0f0f0;
+  }
+  
+  .register-container.dark .register-form input[type="email"],
+  .register-container.dark .register-form input[type="password"] {
+    background-color: #444;
+    border-color: #555;
+    color: #f0f0f0;
+  }
+  
+  .register-container.dark .register-form button {
+    background-color: #218838; /* Adjust button color for dark theme if needed */
+  }
+  
+  .register-container.dark .register-form button:hover {
+    background-color: #1e7e34;
+  }
+  
+  .register-container.dark .register-form p a {
+    color: #66abff;
+  }
+  

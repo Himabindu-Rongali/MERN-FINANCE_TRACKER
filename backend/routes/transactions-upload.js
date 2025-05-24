@@ -4,12 +4,13 @@ const Tesseract = require('tesseract.js');
 const path = require('path');
 const fs = require('fs');
 const router = express.Router();
+const authMiddleware = require('../middleware/authMiddleware'); // Import auth middleware
 
 // Multer setup for file uploads
 const upload = multer({ dest: 'uploads/' });
 
 // POST /transactions/upload-image: Upload image and auto-add transaction
-router.post('/upload-image', upload.single('image'), async (req, res) => {
+router.post('/upload-image', authMiddleware, upload.single('image'), async (req, res) => { // Protect with authMiddleware
   if (!req.file) {
     return res.status(400).json({ message: 'No file uploaded' });
   }

@@ -271,57 +271,164 @@ li button:hover {
 }
 
 /* Navbar */
+.navbar {
+  display: flex;
+  justify-content: flex-end; /* Changed from space-between to flex-end */
+  align-items: center;
+  padding: 1rem 2rem; /* Increased padding */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Softer shadow */
+  position: sticky; /* Make navbar sticky */
+  top: 0;
+  z-index: 1000; /* Ensure navbar stays on top */
+  transition: background-color 0.3s ease, color 0.3s ease; /* Smooth transition for theme changes */
+}
+
 /* Light theme navbar */
 .light .navbar {
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  padding: 10px 20px;
-  background-color: #333;
-  border-bottom: 1px solid #ccc;
+  background-color: #ffffff; /* Brighter background for light theme */
+  border-bottom: 1px solid #e0e0e0; /* Lighter border */
 }
+
+.light .nav-link {
+  color: #333; /* Darker link color for better contrast */
+  font-weight: 500; /* Slightly bolder font */
+  padding: 0.5rem 0.75rem; /* Add padding to links */
+  border-radius: 4px; /* Rounded corners for links on hover/active */
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.light .nav-link:hover,
+.light .nav-link.active { /* Assuming you might add an 'active' class */
+  background-color: #e9ecef;
+  color: #007bff;
+}
+
+.light .button-link {
+  color: #007bff;
+  font-weight: 500;
+  padding: 0.5rem 0.75rem;
+  border-radius: 4px;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.light .button-link:hover {
+  background-color: #e9ecef;
+  color: #0056b3;
+}
+
 
 /* Dark theme navbar */
 .dark .navbar {
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  padding: 10px 20px;
-  background-color: #1a1a2e;
-  border-bottom: 1px solid #444;
+  background-color: #2c3e50; /* Darker, more distinct background for dark theme */
+  border-bottom: 1px solid #34495e; /* Subtle border for dark theme */
 }
 
-/* Right side navigation container */
+.dark .nav-link {
+  color: #ecf0f1; /* Lighter link color for dark theme */
+  font-weight: 500;
+  padding: 0.5rem 0.75rem;
+  border-radius: 4px;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.dark .nav-link:hover,
+.dark .nav-link.active {
+  background-color: #34495e;
+  color: #3498db;
+}
+
+.dark .button-link {
+  color: #3498db;
+  font-weight: 500;
+  padding: 0.5rem 0.75rem;
+  border-radius: 4px;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.dark .button-link:hover {
+  background-color: #34495e;
+  color: #2980b9;
+}
+
+
+/* General Navbar structure adjustments - these were mostly fine */
 .right-side-nav {
   display: flex;
   align-items: center;
   gap: 20px;
 }
 
-.nav-links {
+.nav-content { /* This div was added in App.js, ensure it takes full width and uses flex */
   display: flex;
-  gap: 15px;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
 }
 
-.light .nav-link {
-  text-decoration: none;
-  font-weight: bold;
-  font-size: 18px;
-  padding: 8px 16px;
-  border-radius: 5px;
-  transition: background-color 0.3s ease, color 0.3s ease;
-  color: white;
+.nav-links {
+  display: flex; 
+  align-items: center;
+  gap: 0.5rem; /* Add small gap between nav links */
 }
 
-.dark .nav-link {
+.nav-link {
+  margin-right: 0; /* Remove individual margin, use gap in .nav-links */
   text-decoration: none;
-  font-weight: bold;
-  font-size: 18px;
-  padding: 8px 16px;
-  border-radius: 5px;
-  transition: background-color 0.3s ease, color 0.3s ease;
-  color: #e6e6e6;
+  /* color is now theme-dependent */
 }
+
+/* .nav-link:hover is now theme-dependent */
+
+.button-link {
+  background: none;
+  border: none;
+  padding: 0; /* Padding is now theme-dependent */
+  font: inherit; /* Keep font inheritance */
+  cursor: pointer;
+  /* color is now theme-dependent */
+  margin-left: 0.5rem; /* Add some space before the logout button if it's next to other links */
+}
+
+.user-info-and-auth {
+  display: flex; /* Aligns its children (user-profile, auth-links, ThemeToggle) horizontally */
+  align-items: center;
+}
+
+.user-profile-info {
+  display: flex;
+  align-items: center;
+  margin-right: 1rem; /* Space between user info and auth links/theme toggle */
+}
+
+.username-display {
+  font-weight: bold;
+  margin-right: 0.5rem; /* Space between username and email */
+}
+
+.email-display {
+  font-size: 0.9em;
+  color: #6c757d; /* Example email color */
+}
+
+.auth-links {
+  display: flex; 
+  align-items: center;
+  /* margin-right: 1rem; */ /* Replaced by gap in .right-side-nav */
+}
+
+/* Add or adjust other styles as needed */
+
+/* Ensure app-container takes up viewport height if navbar is fixed or sticky */
+.app-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Make main content area flexible to push footer down if any */
+/* Routes container or main content wrapper would need to grow */
+/* For example, if Routes is directly under nav: */
+/* .app-container > .navbar + * { flex-grow: 1; } */
 
 .view-transactions-button {
   background-color: #4CAF50;

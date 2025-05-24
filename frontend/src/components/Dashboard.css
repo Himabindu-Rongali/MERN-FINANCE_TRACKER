@@ -3,8 +3,9 @@
   font-family: 'Arial', sans-serif;
   padding: 20px;
   border-radius: 10px;
-  max-width: 1200px;
-  margin: 30px auto;
+  margin: 30px 0; /* Keep top/bottom margin, remove side auto margin */
+  width: 100%; /* Ensure it tries to take full width */
+  box-sizing: border-box; /* Include padding and border in the element's total width and height */
   transition: all 0.3s ease;
 }
 
