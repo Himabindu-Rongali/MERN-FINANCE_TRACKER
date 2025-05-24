@@ -66,6 +66,10 @@ const AuthProvider = ({ children }) => {
     setLoading(false); // Not loading after logout
   }, []); // setToken and setUser from useState are stable
 
+  const updateUser = useCallback((updatedUserData) => {
+    setUser(prevUser => ({ ...prevUser, ...updatedUserData }));
+  }, []); // setUser is stable
+
   // isAuthenticated will be re-created if `token` changes, due to `useCallback` dependency
   const isAuthenticated = useCallback(() => !!token, [token]);
 
@@ -77,7 +81,8 @@ const AuthProvider = ({ children }) => {
     login,
     logout,
     isAuthenticated,
-  }), [token, user, loading, login, logout, isAuthenticated]);
+    updateUser, // Add updateUser to context
+  }), [token, user, loading, login, logout, isAuthenticated, updateUser]); // Add updateUser to dependencies
 
   return (
     <AuthContext.Provider value={contextValue}>

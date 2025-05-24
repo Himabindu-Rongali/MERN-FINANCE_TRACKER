@@ -12,7 +12,7 @@ const PORT = 5000;
 // Middlewares
 app.use(cors({
   origin: 'http://localhost:3000',
-  methods: ['GET', 'POST', 'DELETE'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE'], // Added PUT
   credentials: true
 }));
 app.use(express.json()); // ✅ Moved above the routes
