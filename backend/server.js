@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const transactionRoutes = require('./routes/transactions');
 const incomeRoutes = require('./routes/income');
+const transactionsUploadRoutes = require('./routes/transactions-upload');
 
 const app = express();
 const PORT = 5000;
@@ -18,6 +19,7 @@ app.use(express.json()); // ✅ Moved above the routes
 // Routes
 app.use('/transactions', transactionRoutes);
 app.use('/api/income', incomeRoutes); // ✅ This now has access to req.body
+app.use('/transactions/upload', transactionsUploadRoutes);
 
 // MongoDB Connection
 mongoose.connect('mongodb://127.0.0.1:27017/financeapp')

@@ -12,6 +12,27 @@ body {
   line-height: 1.5;
 }
 
+/* Forms container for side-by-side forms */
+.forms-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  justify-content: center;
+  margin: 0 auto;
+  max-width: 1200px;
+}
+
+.forms-container > div {
+  flex: 1;
+  min-width: 300px;
+}
+
+@media (max-width: 768px) {
+  .forms-container {
+    flex-direction: column;
+  }
+}
+
 /* Light theme (default) */
 body, .app-container.light {
   background-color: #f4f7fc;
