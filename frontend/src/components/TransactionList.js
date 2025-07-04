@@ -12,6 +12,8 @@ const TransactionList = ({ transactions, deleteTransaction }) => {
   const [viewedTransaction, setViewedTransaction] = useState(null);
   const [transactionToDelete, setTransactionToDelete] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const transactionsPerPage = 8;
 
   // Function to download transaction
   const downloadTransaction = (transaction) => {
@@ -53,6 +55,7 @@ Receipt generated on ${new Date().toLocaleString('en-IN')}
     const timer = setTimeout(() => {
       setIsLoading(false);
     }, 300);
+    setCurrentPage(1); // Reset to first page on filter change
     return () => clearTimeout(timer);
   }, [selectedYear, selectedMonth, selectedCategory, selectedPaymentMethod, sortBy, sortOrder]);
 
@@ -147,6 +150,51 @@ Receipt generated on ${new Date().toLocaleString('en-IN')}
       : compareA > compareB ? -1 : compareA < compareB ? 1 : 0;
   });
 
+  const totalPages = Math.ceil(sortedTransactions.length / transactionsPerPage);
+  const paginatedTransactions = sortedTransactions.slice(
+    (currentPage - 1) * transactionsPerPage,
+    currentPage * transactionsPerPage
+  );
+
+  const handlePageChange = (page) => {
+    if (page >= 1 && page <= totalPages) {
+      setCurrentPage(page);
+    }
+  };
+
+  const getPaginationItems = () => {
+    const totalNumbers = 5; // Total page numbers to display
+    const totalBlocks = totalNumbers + 2; // Including ellipses
+
+    if (totalPages <= totalBlocks) {
+      return Array.from({ length: totalPages }, (_, i) => i + 1);
+    }
+
+    const startPage = Math.max(2, currentPage - 2);
+    const endPage = Math.min(totalPages - 1, currentPage + 2);
+
+    let pages = [1];
+
+    if (currentPage > 4) {
+      pages.push('...');
+    }
+
+    for (let i = startPage; i <= endPage; i++) {
+      if (i > 1 && i < totalPages) {
+        pages.push(i);
+      }
+    }
+
+    if (currentPage < totalPages - 3) {
+      pages.push('...');
+    }
+
+    pages.push(totalPages);
+
+    return pages;
+  };
+
+
   return (
     <div className="transaction-list-container">
       <h2 className="transaction-header">Transaction History</h2>
@@ -209,8 +257,8 @@ Receipt generated on ${new Date().toLocaleString('en-IN')}
         </div>
       ) : (
         <ul className="transaction-list">
-          {sortedTransactions.length > 0 ? (
-            sortedTransactions.map((transaction) => (
+          {paginatedTransactions.length > 0 ? (
+            paginatedTransactions.map((transaction) => (
               <li key={transaction._id} className="transaction-item">
                 <div className="transaction-details">
                   <span className="transaction-amount">₹{transaction.amount}</span>
@@ -250,7 +298,41 @@ Receipt generated on ${new Date().toLocaleString('en-IN')}
             </div>
           )}
         </ul>
-      )}      {/* Details Modal/Section */}
+      )}
+
+      {totalPages > 1 && (
+        <div className="pagination-container">
+          <button 
+            onClick={() => handlePageChange(currentPage - 1)} 
+            disabled={currentPage === 1}
+            className="pagination-button"
+          >
+            Previous
+          </button>
+          {getPaginationItems().map((item, index) => (
+            typeof item === 'number' ? (
+              <button
+                key={index}
+                onClick={() => handlePageChange(item)}
+                className={`pagination-button ${currentPage === item ? 'active' : ''}`}
+              >
+                {item}
+              </button>
+            ) : (
+              <span key={index} className="pagination-ellipsis">...</span>
+            )
+          ))}
+          <button 
+            onClick={() => handlePageChange(currentPage + 1)} 
+            disabled={currentPage === totalPages}
+            className="pagination-button"
+          >
+            Next
+          </button>
+        </div>
+      )}
+
+      {/* Details Modal/Section */}
       {viewedTransaction && (
         <div className="transaction-modal">
           <div className="modal-content">
