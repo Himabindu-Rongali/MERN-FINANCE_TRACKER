@@ -13,6 +13,7 @@ import Register from './components/Register';
 import { AuthProvider, AuthContext } from './context/AuthContext';
 import ProfileDropdown from './components/ProfileDropdown';
 import ForgotPassword from './components/ForgotPassword';
+import LandingPage from './components/LandingPage';
 
 import './App.css';
 
@@ -70,7 +71,7 @@ const AppContent = () => {
       <nav className="navbar">
         <div className="navbar-content-right">
           <div className="nav-links">
-            <Link to="/" className="nav-link">Home</Link>
+            <Link to={isAuthenticated() ? "/home" : "/"} className="nav-link">Home</Link>
             {isAuthenticated() && (
               <>
                 <Link to="/transactions" className="nav-link">Transactions</Link>
@@ -94,11 +95,12 @@ const AppContent = () => {
       </nav>
 
       <Routes>
+        <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route 
-          path="/" 
+          path="/home" 
           element={
             <PrivateRoute>
               <div className={`home-page ${theme}`}>

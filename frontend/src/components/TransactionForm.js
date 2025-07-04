@@ -1,4 +1,5 @@
 import React, { useState, useContext } from 'react';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { ThemeContext } from './ThemeContext';
 import './TransactionForm.css';
@@ -12,6 +13,11 @@ const TransactionForm = ({ refreshTransactions, handleAddTransaction }) => {
   const [image, setImage] = useState(null);
   const [uploading, setUploading] = useState(false);
   const { theme } = useContext(ThemeContext);
+  const navigate = useNavigate();
+
+  const handleBack = () => {
+    navigate('/');
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -81,6 +87,18 @@ const TransactionForm = ({ refreshTransactions, handleAddTransaction }) => {
 
   return (
     <div className={`transaction-form-container ${theme}`}>
+      <span 
+        onClick={handleBack} 
+        style={{ 
+          position: 'absolute',
+          top: '20px',
+          left: '20px',
+          fontSize: '24px',
+          cursor: 'pointer' 
+        }}
+      >
+        &#x2190; {/* Left arrow character */}
+      </span>
       <h2 className="form-section-title">Add New Transaction</h2>
       <form onSubmit={handleSubmit} className="transaction-form">
         {/* Image upload for OCR */}

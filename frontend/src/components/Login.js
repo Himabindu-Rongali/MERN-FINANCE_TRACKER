@@ -21,7 +21,7 @@ const Login = () => {
       // Call the login function from AuthContext. This will handle token storage, 
       // user fetching, and updating context state.
       await login(res.data.token); 
-      navigate('/'); // Redirect after successful context login and user fetch
+      navigate('/home'); // Redirect to the home page (transaction form)
     } catch (err) {
       // AuthContext's login function might re-throw an error if user fetch fails.
       // Or, the initial axios.post might fail.
