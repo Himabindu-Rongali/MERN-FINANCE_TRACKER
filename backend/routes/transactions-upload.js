@@ -8,7 +8,7 @@ const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 
 // Google Gemini API configuration for Gemini 1.5 Flash
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY || 'AIzaSyAoFv3fvbQxAP8pvtmcfaFaX8pzjdoNTDM'; // Use environment variable or provided API key
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY || 'GEMINI_API'; // Use environment variable or provided API key
 const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent'; // Use Gemini 1.5 Flash model
 
 // POST /transactions/upload/upload-image
