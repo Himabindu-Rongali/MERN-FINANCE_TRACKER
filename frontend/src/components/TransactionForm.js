@@ -10,7 +10,7 @@ const TransactionForm = ({ refreshTransactions, handleAddTransaction }) => {
   const [date, setDate] = useState('');
   const [description, setDescription] = useState('');
   const [paymentMethod, setPaymentMethod] = useState('');  // State for payment method
-  const [image, setImage] = useState(null);
+  const [file, setFile] = useState(null);
   const [uploading, setUploading] = useState(false);
   const { theme } = useContext(ThemeContext);
   const navigate = useNavigate();
@@ -36,14 +36,14 @@ const TransactionForm = ({ refreshTransactions, handleAddTransaction }) => {
     }
   };
 
-  // Handle image upload and auto-fill fields
-  const handleImageUpload = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    setImage(file);
+  // Handle file upload and auto-fill fields
+  const handleFileUpload = async (e) => {
+    const uploadedFile = e.target.files[0];
+    if (!uploadedFile) return;
+    setFile(uploadedFile);
     setUploading(true);
     const formData = new FormData();
-    formData.append('image', file);
+    formData.append('file', uploadedFile);
     try {
       const res = await axios.post('http://localhost:5000/transactions/upload/upload-image', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
@@ -80,7 +80,7 @@ const TransactionForm = ({ refreshTransactions, handleAddTransaction }) => {
       // The user will review and click "Add Transaction" to save
 
     } catch (err) {
-      alert('Failed to extract transaction from image.');
+      alert('Failed to extract transaction from document.');
     }
     setUploading(false);
   };
@@ -101,12 +101,17 @@ const TransactionForm = ({ refreshTransactions, handleAddTransaction }) => {
       </span>
       <h2 className="form-section-title">Add New Transaction</h2>
       <form onSubmit={handleSubmit} className="transaction-form">
-        {/* Image upload for OCR */}
+        {/* File upload for OCR */}
         <label>
-          Upload Transaction Image:
-          <input type="file" accept="image/*" onChange={handleImageUpload} disabled={uploading} />
+          Upload Transaction Document (Image or PDF):
+          <input 
+            type="file" 
+            accept="image/*,.pdf" 
+            onChange={handleFileUpload} 
+            disabled={uploading} 
+          />
         </label>
-        {uploading && <div>Extracting data from image...</div>}
+        {uploading && <div>Extracting data from document...</div>}
 
         <label>
           Amount:

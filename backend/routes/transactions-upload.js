@@ -3,18 +3,42 @@ const multer = require('multer');
 const axios = require('axios');
 const router = express.Router();
 
-// Multer setup for image uploads
+// Multer setup for image and PDF uploads
 const storage = multer.memoryStorage();
-const upload = multer({ storage: storage });
+const upload = multer({
+  storage: storage,
+  limits: {
+    fileSize: 10 * 1024 * 1024, // 10MB limit
+  },
+  fileFilter: (req, file, cb) => {
+    if (file.mimetype.startsWith('image/') || file.mimetype === 'application/pdf') {
+      cb(null, true);
+    } else {
+      cb(new Error('Invalid file type. Only images and PDFs are allowed.'), false);
+    }
+  }
+});
 
 // Google Gemini API configuration for Gemini 1.5 Flash
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY || 'AIzaSyAoFv3fvbQxAP8pvtmcfaFaX8pzjdoNTDM'; // Use environment variable or provided API key
 const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent'; // Use Gemini 1.5 Flash model
 
 // POST /transactions/upload/upload-image
-router.post('/upload-image', upload.single('image'), async (req, res) => {
+router.post('/upload-image', (req, res, next) => {
+  upload.single('file')(req, res, (err) => {
+    if (err instanceof multer.MulterError) {
+      if (err.code === 'LIMIT_FILE_SIZE') {
+        return res.status(400).json({ message: 'File size too large. Maximum size is 10MB.' });
+      }
+      return res.status(400).json({ message: 'File upload error: ' + err.message });
+    } else if (err) {
+      return res.status(400).json({ message: err.message });
+    }
+    next();
+  });
+}, async (req, res) => { // Changed 'image' to 'file'
   if (!req.file) {
-    return res.status(400).json({ message: 'No image file provided.' });
+    return res.status(400).json({ message: 'No file provided.' }); // Updated message
   }
 
   if (!GEMINI_API_KEY || GEMINI_API_KEY === 'YOUR_GEMINI_API_KEY') { // Updated check
@@ -23,19 +47,34 @@ router.post('/upload-image', upload.single('image'), async (req, res) => {
   }
 
   try {
-    // Convert image buffer to base64
-    const imageBase64 = req.file.buffer.toString('base64');
+    // Validate file size (limit to 10MB)
+    const maxSize = 10 * 1024 * 1024; // 10MB
+    if (req.file.size > maxSize) {
+      return res.status(400).json({ message: 'File size too large. Maximum size is 10MB.' });
+    }
 
-    // Prepare the prompt and image data for the Gemini model
+    // Additional validation for PDF files
+    if (req.file.mimetype === 'application/pdf') {
+      // Check if the PDF buffer has the PDF header
+      const pdfHeader = req.file.buffer.slice(0, 4).toString();
+      if (pdfHeader !== '%PDF') {
+        return res.status(400).json({ message: 'Invalid PDF file format.' });
+      }
+    }
+
+    // Convert file buffer to base64
+    const fileBase64 = req.file.buffer.toString('base64'); // Changed variable name
+
+    // Prepare the prompt and file data for the Gemini model
     const requestPayload = {
       contents: [
         {
           parts: [
-            { text: 'Analyze the following receipt image and extract the total amount, category (e.g., groceries, fuel, food, shopping), date, payment type (e.g., cash, credit card, debit card), and a brief description of the transaction. Return the data in a clean JSON format like this:\n{\n  "amount": 123.45,\n  "category": "Groceries",\n  "date": "YYYY-MM-DD",\n  "paymentType": "Credit Card",\n  "description": "Brief description of items purchased"\n}' }, // Updated text prompt part to include payment type and description
+            { text: 'Analyze the following document (image or PDF) and extract the total amount, category (e.g., groceries, fuel, food, shopping), date, payment type (e.g., cash, credit card, debit card), and a brief description of the transaction. Return the data in a clean JSON format like this:\n{\n  "amount": 123.45,\n  "category": "Groceries",\n  "date": "YYYY-MM-DD",\n  "paymentType": "Credit Card",\n  "description": "Brief description of items purchased"\n}' }, // Updated text prompt part to include payment type and description and mention PDF
             {
-              inline_data: { // Image data part
+              inline_data: { // File data part
                 mime_type: req.file.mimetype,
-                data: imageBase64
+                data: fileBase64 // Changed variable name
               }
             }
           ]
@@ -64,7 +103,7 @@ router.post('/upload-image', upload.single('image'), async (req, res) => {
     // Clean the response to extract only the JSON part
     // Assuming Gemini might also wrap JSON in code blocks
     const jsonMatch = generatedText.match(/```json\n([\s\S]*?)\n```/);
-    
+
     if (!jsonMatch || !jsonMatch[1]) {
         console.error('Could not find JSON in Gemini response:', generatedText);
         // Fallback: try parsing the whole text if no code block is found
@@ -85,8 +124,27 @@ router.post('/upload-image', upload.single('image'), async (req, res) => {
     res.json(extractedData);
 
   } catch (error) {
-    console.error('Error processing image with Gemini API:', error.response ? error.response.data : error.message);
-    res.status(500).json({ message: 'Failed to extract transaction from image using AI.' });
+    console.error('Error processing file with Gemini API:', error.response ? error.response.data : error.message);
+    
+    // Handle specific Gemini API errors
+    if (error.response && error.response.data && error.response.data.error) {
+      const geminiError = error.response.data.error;
+      
+      if (geminiError.code === 400) {
+        if (geminiError.message.includes('no pages')) {
+          return res.status(400).json({ 
+            message: 'The PDF file appears to be empty or corrupted. Please try uploading a different file.' 
+          });
+        } else if (geminiError.message.includes('format')) {
+          return res.status(400).json({ 
+            message: 'The file format is not supported. Please upload a valid image or PDF file.' 
+          });
+        }
+      }
+    }
+    
+    // Generic error message for other cases
+    res.status(500).json({ message: 'Failed to extract transaction from file using AI.' });
   }
 });
 
