@@ -4,12 +4,49 @@ const Transaction = require('../models/Transaction');
 const router = express.Router();
 const authMiddleware = require('../middleware/authMiddleware'); // Import auth middleware
 
-// GET all transactions
+// GET all transactions with optional date filtering
 router.get('/', authMiddleware, async (req, res) => { // Protect with authMiddleware
   try {
-    // Modify to fetch transactions for the logged-in user
-    // Assuming Transaction model has a 'user' field storing the user ID
-    const transactions = await Transaction.find({ user: req.user.id }); 
+    const { startDate, endDate, year, month } = req.query;
+    let filter = { user: req.user.id };
+
+    // Add date filtering
+    if (startDate || endDate || year || month) {
+      filter.date = {};
+      
+      if (startDate) {
+        filter.date.$gte = new Date(startDate);
+      }
+      
+      if (endDate) {
+        const end = new Date(endDate);
+        end.setDate(end.getDate() + 1); // Include end date
+        filter.date.$lt = end;
+      }
+      
+      if (year && !startDate && !endDate) {
+        const y = parseInt(year);
+        if (!isNaN(y)) {
+          if (month !== undefined && month !== '') {
+            const m = parseInt(month);
+            if (!isNaN(m)) {
+              filter.date = {
+                $gte: new Date(y, m, 1),
+                $lt: new Date(y, m + 1, 1)
+              };
+            }
+          } else {
+            filter.date = {
+              $gte: new Date(y, 0, 1),
+              $lt: new Date(y + 1, 0, 1)
+            };
+          }
+        }
+      }
+    }
+
+    // Modify to fetch transactions for the logged-in user with date filtering
+    const transactions = await Transaction.find(filter).sort({ date: -1 }); 
     res.json(transactions);
   } catch (err) {
     res.status(500).json({ message: err.message });

@@ -3,10 +3,10 @@ const router = express.Router();
 const Income = require('../models/Income');
 const authMiddleware = require('../middleware/authMiddleware'); // Import auth middleware
 
-// GET: Get incomes, optionally filtered by year and month
+// GET: Get incomes, optionally filtered by year and month or date range
 router.get('/', authMiddleware, async (req, res) => { // Protect with authMiddleware
   try {
-    const { year, month } = req.query;
+    const { year, month, startDate, endDate } = req.query;
     let filter = { user: req.user.id }; // Initialize filter with user ID
 
     const now = new Date();
@@ -38,8 +38,22 @@ router.get('/', authMiddleware, async (req, res) => { // Protect with authMiddle
       }
     }
 
-    // Apply year and month filter if present
-    if (year) {
+    // Apply date range filtering if provided
+    if (startDate || endDate) {
+      filter.date = {};
+      
+      if (startDate) {
+        filter.date.$gte = new Date(startDate);
+      }
+      
+      if (endDate) {
+        const end = new Date(endDate);
+        end.setDate(end.getDate() + 1); // Include end date
+        filter.date.$lt = end;
+      }
+    }
+    // Apply year and month filter if present and no date range provided
+    else if (year) {
       const y = parseInt(year);
       if (!isNaN(y)) {
         if (month !== undefined && month !== '') {
@@ -64,7 +78,7 @@ router.get('/', authMiddleware, async (req, res) => { // Protect with authMiddle
       }
     }
 
-    const incomes = await Income.find(filter).sort({ date: 1 });
+    const incomes = await Income.find(filter).sort({ date: -1 });
     res.json(incomes);
   } catch (err) {
     res.status(500).json({ message: err.message });
