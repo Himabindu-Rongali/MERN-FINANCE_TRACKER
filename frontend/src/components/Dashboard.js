@@ -1,3 +1,17 @@
+/**
+ * Dashboard Component - Financial Analytics and Visualization
+ * 
+ * This component provides a comprehensive financial dashboard with:
+ * - Transaction and income visualization
+ * - Year-over-year comparison
+ * - Monthly expense tracking
+ * - Category-based analysis
+ * - AI-powered financial insights
+ * 
+ * @param {Object} props - Component props
+ * @param {Array} props.transactions - Array of transaction objects
+ * @returns {JSX.Element} Dashboard component
+ */
 import React, { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 import { Line, Bar } from 'react-chartjs-2';
@@ -18,6 +32,7 @@ import {
 import { ThemeContext } from './ThemeContext';
 import './Dashboard.css';
 
+// Register Chart.js components
 ChartJS.register(
   ArcElement,
   Tooltip,
@@ -31,48 +46,71 @@ ChartJS.register(
   Filler
 );
 
-const Dashboard = ({ transactions }) => {
+/**
+ * Dashboard Component - Main financial analytics dashboard
+ * Provides comprehensive financial tracking and visualization
+ */
+const Dashboard = ({ transactions = [] }) => {
+  // Date utilities
   const currentDate = new Date();
   const currentYear = currentDate.getFullYear();
   const currentMonth = currentDate.getMonth();
   const { theme } = useContext(ThemeContext);
 
+  // State management for dashboard data and UI
   const [incomes, setIncomes] = useState([]);
   const [selectedView, setSelectedView] = useState('withinYear');
   const [selectedYear, setSelectedYear] = useState(currentYear.toString());
   const [selectedMonth, setSelectedMonth] = useState(currentMonth.toString());
-  const [chartType, setChartType] = useState('line'); // line, bar
-  const [timeRange, setTimeRange] = useState('month'); // week, month, quarter, year
+  const [chartType, setChartType] = useState('line'); // Chart type: line, bar
+  const [timeRange, setTimeRange] = useState('month'); // Time range: week, month, quarter, year
   const [showComparison, setShowComparison] = useState(false);
   const [selectedCategories, setSelectedCategories] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
   
-  // Year comparison states
+  // Year comparison states for multi-year analysis
   const [startYear, setStartYear] = useState((currentYear - 1).toString());
   const [endYear, setEndYear] = useState(currentYear.toString());
 
+  // Month names for display
   const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
-  // Fetch income from backend with date conversion to Date object
+  /**
+   * Fetch income data from backend API
+   * Handles data transformation and error states
+   */
   useEffect(() => {
     const fetchIncome = async () => {
       try {
+        setLoading(true);
+        setError(null);
+        
         const res = await axios.get('http://localhost:5000/api/income');
         const incomeData = res.data.map(income => ({
           ...income,
           date: new Date(income.date),  // Convert string date to Date object
         }));
+        
         setIncomes(incomeData);
       } catch (error) {
         console.error('Error fetching income:', error);
+        setError('Failed to fetch income data. Please try again later.');
+      } finally {
+        setLoading(false);
       }
     };
 
     fetchIncome();
   }, []);
 
+  /**
+   * Event handlers for year and month selection
+   * Updates state and clears dependent selections when needed
+   */
   const handleYearChange = (e) => {
     setSelectedYear(e.target.value);
-    setSelectedMonth('');
+    setSelectedMonth(''); // Clear month selection when year changes
   };
 
   const handleMonthChange = (e) => {
@@ -87,65 +125,134 @@ const Dashboard = ({ transactions }) => {
     setEndYear(e.target.value);
   };
 
+  /**
+   * Calculate yearly expense totals from transactions
+   * @returns {Object} Object with year as key and total expense as value
+   */
   const yearlyTotals = transactions.reduce((acc, transaction) => {
-    const year = new Date(transaction.date).getFullYear();
-    acc[year] = (acc[year] || 0) + transaction.amount;
+    try {
+      const year = new Date(transaction.date).getFullYear();
+      if (!isNaN(year)) {
+        acc[year] = (acc[year] || 0) + (transaction.amount || 0);
+      }
+    } catch (error) {
+      console.warn('Invalid transaction date:', transaction.date);
+    }
     return acc;
   }, {});
 
-  // Get available years from transactions
+  /**
+   * Get all available years from transactions for dropdown options
+   * @returns {Array} Sorted array of years (descending)
+   */
   const getAvailableYears = () => {
     const years = new Set();
     transactions.forEach(transaction => {
-      const year = new Date(transaction.date).getFullYear();
-      years.add(year);
+      try {
+        const year = new Date(transaction.date).getFullYear();
+        if (!isNaN(year)) {
+          years.add(year);
+        }
+      } catch (error) {
+        console.warn('Invalid transaction date:', transaction.date);
+      }
     });
     return Array.from(years).sort((a, b) => b - a); // Sort descending
   };
 
   const availableYears = getAvailableYears();
 
+  /**
+   * Calculate monthly expense totals for a specific year
+   * @param {string} year - Year to calculate totals for
+   * @returns {Object} Object with month index as key and total expense as value
+   */
   const monthlyTotalsForYear = (year) => {
     const monthly = {};
+    if (!year || !transactions.length) return monthly;
+    
     transactions.forEach(transaction => {
-      const date = new Date(transaction.date);
-      if (date.getFullYear() === parseInt(year)) {
-        const month = date.getMonth();
-        monthly[month] = (monthly[month] || 0) + transaction.amount;
+      try {
+        const date = new Date(transaction.date);
+        if (!isNaN(date.getTime()) && date.getFullYear() === parseInt(year)) {
+          const month = date.getMonth();
+          monthly[month] = (monthly[month] || 0) + (transaction.amount || 0);
+        }
+      } catch (error) {
+        console.warn('Invalid transaction date:', transaction.date);
       }
     });
     return monthly;
   };
 
+  /**
+   * Calculate category-wise expense totals for a specific month and year
+   * @param {string} year - Year to filter by
+   * @param {string} month - Month to filter by (0-indexed)
+   * @returns {Object} Object with category as key and total expense as value
+   */
   const categoryTotalsForMonth = (year, month) => {
     const categoryTotals = {};
+    if (!year || month === '' || !transactions.length) return categoryTotals;
+    
     transactions.forEach(transaction => {
-      const date = new Date(transaction.date);
-      if (date.getFullYear() === parseInt(year) && date.getMonth() === parseInt(month)) {
-        const category = transaction.category?.toLowerCase(); // normalize
-        if (category) {
-          categoryTotals[category] = (categoryTotals[category] || 0) + transaction.amount;
+      try {
+        const date = new Date(transaction.date);
+        if (!isNaN(date.getTime()) && 
+            date.getFullYear() === parseInt(year) && 
+            date.getMonth() === parseInt(month)) {
+          const category = transaction.category?.toLowerCase()?.trim();
+          if (category) {
+            categoryTotals[category] = (categoryTotals[category] || 0) + (transaction.amount || 0);
+          }
         }
+      } catch (error) {
+        console.warn('Invalid transaction date:', transaction.date);
       }
     });
     return categoryTotals;
   };
 
-  
-
+  /**
+   * Calculate total expense for selected month and year
+   * @returns {number} Total expense amount
+   */
   const selectedMonthExpense = (selectedYear && selectedMonth !== '')
     ? transactions.filter(transaction => {
-        const date = new Date(transaction.date);
-        return date.getFullYear() === parseInt(selectedYear) && date.getMonth() === parseInt(selectedMonth);
-      }).reduce((acc, transaction) => acc + transaction.amount, 0)
+        try {
+          const date = new Date(transaction.date);
+          return !isNaN(date.getTime()) && 
+                 date.getFullYear() === parseInt(selectedYear) && 
+                 date.getMonth() === parseInt(selectedMonth);
+        } catch (error) {
+          console.warn('Invalid transaction date:', transaction.date);
+          return false;
+        }
+      }).reduce((acc, transaction) => acc + (transaction.amount || 0), 0)
     : 0;
 
+  /**
+   * Calculate total income for selected month and year
+   * @returns {number} Total income amount
+   */
   const selectedMonthIncome = (selectedYear && selectedMonth !== '')
     ? incomes.filter(income => {
-        const date = income.date;
-        return date.getFullYear() === parseInt(selectedYear) && date.getMonth() === parseInt(selectedMonth);
-      }).reduce((acc, income) => acc + income.amount, 0)
-    : 0;  // Chart options based on theme
+        try {
+          const date = income.date;
+          return date instanceof Date && 
+                 !isNaN(date.getTime()) && 
+                 date.getFullYear() === parseInt(selectedYear) && 
+                 date.getMonth() === parseInt(selectedMonth);
+        } catch (error) {
+          console.warn('Invalid income date:', income.date);
+          return false;
+        }
+      }).reduce((acc, income) => acc + (income.amount || 0), 0)
+    : 0;  /**
+   * Generate chart configuration options based on current theme
+   * Provides responsive design and interactive tooltip settings
+   * @returns {Object} Chart.js configuration object
+   */
   const getChartOptions = () => {
     return {
       responsive: true,
@@ -223,12 +330,12 @@ const Dashboard = ({ transactions }) => {
             duration: 200
           },
           external: function(context) {
-            // Custom tooltip positioning if needed
+            // Custom tooltip positioning for better visibility
             const tooltipEl = context.tooltip;
             if (tooltipEl.opacity === 0) {
               return;
             }
-            // Ensure tooltip is visible
+            // Ensure tooltip displays correctly
             if (tooltipEl.dataPoints && tooltipEl.dataPoints.length > 0) {
               tooltipEl.displayColors = true;
             }
@@ -245,7 +352,11 @@ const Dashboard = ({ transactions }) => {
     };
   };
 
-  // Pie chart options
+  /**
+   * Generate pie chart configuration options
+   * Optimized for category visualization with percentage display
+   * @returns {Object} Chart.js pie chart configuration
+   */
   const getPieOptions = () => {
     return {
       responsive: true,
@@ -293,7 +404,7 @@ const Dashboard = ({ transactions }) => {
               const label = context.label || '';
               const value = context.parsed;
               const total = context.dataset.data.reduce((a, b) => a + b, 0);
-              const percentage = ((value / total) * 100).toFixed(1);
+              const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
               return label + ': ₹' + value.toLocaleString() + ' (' + percentage + '%)';
             }
           }
