@@ -1,103 +1,92 @@
 const express = require('express');
 const multer = require('multer');
-const Tesseract = require('tesseract.js');
-const path = require('path');
-const fs = require('fs');
+const axios = require('axios');
 const router = express.Router();
-const authMiddleware = require('../middleware/authMiddleware'); // Import auth middleware
 
-// Multer setup for file uploads
-const upload = multer({ dest: 'uploads/' });
+// Multer setup for image uploads
+const storage = multer.memoryStorage();
+const upload = multer({ storage: storage });
 
-// POST /transactions/upload-image: Upload image and auto-add transaction
-router.post('/upload-image', authMiddleware, upload.single('image'), async (req, res) => { // Protect with authMiddleware
+// Google Gemini API configuration for Gemini 1.5 Flash
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY || 'AIzaSyAoFv3fvbQxAP8pvtmcfaFaX8pzjdoNTDM'; // Use environment variable or provided API key
+const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent'; // Use Gemini 1.5 Flash model
+
+// POST /transactions/upload/upload-image
+router.post('/upload-image', upload.single('image'), async (req, res) => {
   if (!req.file) {
-    return res.status(400).json({ message: 'No file uploaded' });
+    return res.status(400).json({ message: 'No image file provided.' });
   }
+
+  if (!GEMINI_API_KEY || GEMINI_API_KEY === 'YOUR_GEMINI_API_KEY') { // Updated check
+    console.error('Gemini API key is not configured.');
+    return res.status(500).json({ message: 'AI service is not configured on the server.' });
+  }
+
   try {
-    // Revert to Tesseract.js OCR
-    const { data: { text: ocrText } } = await Tesseract.recognize(
-      req.file.path,
-      'eng',
-      // { logger: m => console.log(m) } // Optional: remove or keep logger
-    );
-    const text = ocrText; // Assign to text variable
-    console.log('OCR result:', text);
+    // Convert image buffer to base64
+    const imageBase64 = req.file.buffer.toString('base64');
 
-    // Flexible parsing logic
-    let amountMatch = text.match(/Amount\D{0,3}(\d+[\d.,]*)/i);
-    if (!amountMatch) amountMatch = text.match(/(\d+[\d.,]*)/); // fallback
-
-    let dateMatch = text.match(/Date\D{0,3}:?\s*([\d\/-]{6,}|[A-Za-z]{3,9} \d{1,2},? \d{4})/i);
-    if (!dateMatch) dateMatch = text.match(/(\d{4}[-/]\d{2}[-/]\d{2})/);
-    if (!dateMatch) dateMatch = text.match(/(\d{2}[-/]\d{2}[-/]\d{4})/);
-    if (!dateMatch) dateMatch = text.match(/([A-Za-z]{3,9} \d{1,2},? \d{4})/);
-
-    // Try to extract description with more flexible keywords - VALUE IN GROUP 1
-    let descriptionMatch = text.match(/(?:Description|Desc|Item|Details)\s*[:\-]?\s*([^\n]+)/i);
-    if (!descriptionMatch) {
-      const lines = text.split('\n').map(l => l.trim());
-      const probableDescriptionLine = lines.find(
-        l => l && !l.match(/Amount|Date|Cash|Card|Online|Category|Payment|Type|Total|Qty|Price|Gst|Tax|Invoice|Bill/i)
-      );
-      if (probableDescriptionLine) {
-        descriptionMatch = [null, probableDescriptionLine]; // Simulate a match structure
-      }
-    }
-
-    // Try to extract payment method with more flexible keywords - VALUE IN GROUP 1
-    let paymentMethodMatch = text.match(/(?:Payment\s*(?:Type|Method)?|Paid\s*By|Mode)\s*[:\-]?\s*(Cash|Card|Online|UPI|Credit|Debit|Netbanking|Wallet)/i);
-    if (!paymentMethodMatch) {
-        // Fallback: ensure value is in group 1
-        paymentMethodMatch = text.match(/\b(Cash|Card|Online|UPI|Credit|Debit|Netbanking|Wallet)\b/i);
-    }
-
-    // Category regex - VALUE IN GROUP 1
-    let categoryMatch = text.match(/Category\s*[:\-]?\s*([^\n]+)/i);
-    if (!categoryMatch) {
-        categoryMatch = text.match(/cat\w*\s*[:\-]?\s*([^\n]+)/i);
-    }
-    if (!categoryMatch) { // Default if category is not found
-        categoryMatch = [null, 'Other']; 
-    }
-
-    // If nothing significant found (adjusting this condition slightly)
-    if (!amountMatch && !dateMatch && (!descriptionMatch || !descriptionMatch[1]) && (!paymentMethodMatch || !paymentMethodMatch[1]) && (!categoryMatch || categoryMatch[1] === 'Other')) {
-      fs.unlinkSync(req.file.path);
-      return res.status(422).json({
-        message: 'Could not extract transaction fields from image.',
-        ocrText: text
-      });
-    }
-
-    // Improved cleaning function: only trim whitespace
-    const cleanField = (str) => str ? str.trim() : '';
-
-    // Debug logs
-    console.log('Extracted Fields:', {
-      amount: amountMatch ? amountMatch[1] : 'N/A',
-      date: dateMatch ? dateMatch[1] : 'N/A',
-      paymentMethod: paymentMethodMatch ? paymentMethodMatch[1] : 'N/A', 
-      category: categoryMatch ? categoryMatch[1] : 'N/A',            
-      description: descriptionMatch ? descriptionMatch[1] : 'N/A'      
-    });
-
-    // Prepare the extracted data to be sent to the client
-    // DO NOT save the transaction here. Only send back the extracted fields.
-    const extractedData = {
-      amount: amountMatch ? parseFloat(amountMatch[1].replace(/,/g, '')) : '',
-      category: categoryMatch ? cleanField(categoryMatch[1]) : 'Other',
-      description: descriptionMatch ? cleanField(descriptionMatch[1]) : '',
-      date: dateMatch ? dateMatch[1] : '', // Send as string, frontend will parse
-      paymentMethod: paymentMethodMatch ? cleanField(paymentMethodMatch[1]) : ''
+    // Prepare the prompt and image data for the Gemini model
+    const requestPayload = {
+      contents: [
+        {
+          parts: [
+            { text: 'Analyze the following receipt image and extract the total amount, category (e.g., groceries, fuel, food, shopping), date, payment type (e.g., cash, credit card, debit card), and a brief description of the transaction. Return the data in a clean JSON format like this:\n{\n  "amount": 123.45,\n  "category": "Groceries",\n  "date": "YYYY-MM-DD",\n  "paymentType": "Credit Card",\n  "description": "Brief description of items purchased"\n}' }, // Updated text prompt part to include payment type and description
+            {
+              inline_data: { // Image data part
+                mime_type: req.file.mimetype,
+                data: imageBase64
+              }
+            }
+          ]
+        }
+      ]
     };
 
-    fs.unlinkSync(req.file.path); // Clean up the uploaded file
-    res.status(200).json(extractedData); // Send only extracted data, not a saved transaction
+    // Call the Google Gemini Inference API
+    const geminiResponse = await axios.post(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, requestPayload, // Send payload
+      {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }
+    );
 
-  } catch (err) {
-    if (req.file) fs.unlinkSync(req.file.path);
-    res.status(500).json({ message: 'Failed to process image', error: err.message });
+    // Extract the generated text from the response
+    // Gemini response structure: response.data.candidates[0].content.parts[0].text
+    const generatedText = geminiResponse.data?.candidates?.[0]?.content?.parts?.[0]?.text;
+
+    if (!generatedText) {
+        console.error('No text generated by Gemini:', geminiResponse.data);
+        throw new Error('AI service did not generate text.');
+    }
+
+    // Clean the response to extract only the JSON part
+    // Assuming Gemini might also wrap JSON in code blocks
+    const jsonMatch = generatedText.match(/```json\n([\s\S]*?)\n```/);
+    
+    if (!jsonMatch || !jsonMatch[1]) {
+        console.error('Could not find JSON in Gemini response:', generatedText);
+        // Fallback: try parsing the whole text if no code block is found
+        try {
+            const extractedData = JSON.parse(generatedText);
+             res.json(extractedData);
+             return;
+        } catch (parseError) {
+             console.error('Could not parse generated text as JSON:', parseError);
+             throw new Error('Invalid response format from AI service.');
+        }
+    }
+
+    const jsonString = jsonMatch[1];
+    const extractedData = JSON.parse(jsonString);
+
+    // Return the extracted data to the frontend
+    res.json(extractedData);
+
+  } catch (error) {
+    console.error('Error processing image with Gemini API:', error.response ? error.response.data : error.message);
+    res.status(500).json({ message: 'Failed to extract transaction from image using AI.' });
   }
 });
 
