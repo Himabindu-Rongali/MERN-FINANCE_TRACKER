@@ -92,7 +92,6 @@ const AppContent = () => {
               <>
                 <Link to="/transactions" className="nav-link">Transactions</Link>
                 <Link to="/dashboard" className="nav-link">Dashboard</Link>
-                <Link to="/analytics" className="nav-link">Analytics</Link>
                 <Link to="/ai-insights" className="nav-link">AI Insights</Link>
                 <Link to="/income" className="nav-link">Income</Link>
                 <Link to="/reports" className="nav-link">Reports</Link>
