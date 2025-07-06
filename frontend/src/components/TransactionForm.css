@@ -819,3 +819,513 @@ body.dark .transaction-form select.error,
   transform: none;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
 }
+
+/* Upload Mode Selector */
+.upload-mode-selector {
+  margin-bottom: 20px;
+}
+
+.mode-options {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.mode-option {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 16px;
+  border: 2px solid transparent;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: center;
+  position: relative;
+}
+
+.mode-option input[type="radio"] {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.mode-option .mode-icon {
+  font-size: 24px;
+  margin-bottom: 8px;
+}
+
+.mode-option .mode-text {
+  font-weight: 600;
+  font-size: 14px;
+  margin-bottom: 4px;
+}
+
+.mode-option .mode-desc {
+  font-size: 12px;
+  opacity: 0.7;
+}
+
+/* Light theme mode options */
+body:not(.dark) .mode-option,
+.light .mode-option {
+  background-color: #f8f9fa;
+  border-color: #e9ecef;
+  color: #495057;
+}
+
+body:not(.dark) .mode-option:hover,
+.light .mode-option:hover {
+  border-color: #007bff;
+  background-color: #e7f3ff;
+}
+
+body:not(.dark) .mode-option.active,
+.light .mode-option.active {
+  border-color: #007bff;
+  background-color: #e7f3ff;
+  color: #007bff;
+}
+
+/* Dark theme mode options */
+body.dark .mode-option,
+.dark .mode-option {
+  background-color: #343a46;
+  border-color: #4a5568;
+  color: #e2e8f0;
+}
+
+body.dark .mode-option:hover,
+.dark .mode-option:hover {
+  border-color: #4299e1;
+  background-color: #2d3748;
+}
+
+body.dark .mode-option.active,
+.dark .mode-option.active {
+  border-color: #4299e1;
+  background-color: #2d3748;
+  color: #4299e1;
+}
+
+/* Bulk Upload Interface */
+.bulk-upload-interface {
+  margin-top: 20px;
+  padding: 20px;
+  border-radius: 12px;
+  border: 2px dashed #ccc;
+}
+
+/* Light theme bulk interface */
+body:not(.dark) .bulk-upload-interface,
+.light .bulk-upload-interface {
+  background-color: #f8f9fa;
+  border-color: #dee2e6;
+}
+
+/* Dark theme bulk interface */
+body.dark .bulk-upload-interface,
+.dark .bulk-upload-interface {
+  background-color: #343a46;
+  border-color: #4a5568;
+}
+
+.bulk-upload-interface h3 {
+  margin-top: 0;
+  margin-bottom: 16px;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+/* Bulk Summary */
+.bulk-summary {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 20px;
+  padding: 16px;
+  border-radius: 8px;
+  flex-wrap: wrap;
+}
+
+/* Light theme summary */
+body:not(.dark) .bulk-summary,
+.light .bulk-summary {
+  background-color: #e9ecef;
+}
+
+/* Dark theme summary */
+body.dark .bulk-summary,
+.dark .bulk-summary {
+  background-color: #2d3748;
+}
+
+.summary-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 80px;
+}
+
+.summary-label {
+  font-size: 12px;
+  opacity: 0.7;
+  margin-bottom: 4px;
+}
+
+.summary-value {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+/* Transaction Selection */
+.transaction-selection {
+  margin-bottom: 20px;
+}
+
+.selection-header {
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin-bottom: 12px;
+}
+
+/* Light theme selection header */
+body:not(.dark) .selection-header,
+.light .selection-header {
+  background-color: #e9ecef;
+}
+
+/* Dark theme selection header */
+body.dark .selection-header,
+.dark .selection-header {
+  background-color: #2d3748;
+}
+
+.select-all {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.select-all input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+}
+
+/* Transaction List */
+.transaction-list {
+  max-height: 400px;
+  overflow-y: auto;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+}
+
+/* Dark theme transaction list */
+body.dark .transaction-list,
+.dark .transaction-list {
+  border-color: #4a5568;
+}
+
+.bulk-transaction-item {
+  border-bottom: 1px solid #dee2e6;
+  padding: 0;
+}
+
+/* Dark theme bulk transaction item */
+body.dark .bulk-transaction-item,
+.dark .bulk-transaction-item {
+  border-bottom-color: #4a5568;
+}
+
+.bulk-transaction-item:last-child {
+  border-bottom: none;
+}
+
+.bulk-transaction-item.selected {
+  background-color: rgba(40, 167, 69, 0.1);
+  border-left: none;
+  box-shadow: 0 2px 4px rgba(40, 167, 69, 0.2);
+}
+
+/* Dark theme selected bulk transaction item */
+body.dark .bulk-transaction-item.selected,
+.dark .bulk-transaction-item.selected {
+  background-color: rgba(72, 187, 120, 0.15);
+  border-left: none;
+  box-shadow: 0 2px 4px rgba(72, 187, 120, 0.2);
+}
+
+.transaction-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  cursor: pointer;
+  width: 100%;
+  transition: background-color 0.2s ease;
+}
+
+.transaction-checkbox:hover {
+  background-color: rgba(0, 123, 255, 0.05);
+}
+
+.transaction-checkbox input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+
+.transaction-details {
+  flex: 1;
+  min-width: 0;
+}
+
+.bulk-transaction-main {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4px;
+}
+
+.transaction-date {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.transaction-amount {
+  font-size: 16px;
+  font-weight: 600;
+  color: #28a745;
+}
+
+.bulk-transaction-info {
+  display: flex;
+  gap: 8px;
+  font-size: 12px;
+  opacity: 0.7;
+  flex-wrap: wrap;
+}
+
+.transaction-description {
+  font-weight: 500;
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bulk-upload-interface .transaction-category,
+.bulk-upload-interface .transaction-payment {
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 500;
+}
+
+/* Light theme transaction badges for bulk upload only */
+body:not(.dark) .bulk-upload-interface .transaction-category,
+.light .bulk-upload-interface .transaction-category {
+  background-color: #007bff;
+  color: white;
+}
+
+body:not(.dark) .bulk-upload-interface .transaction-payment,
+.light .bulk-upload-interface .transaction-payment {
+  background-color: #6c757d;
+  color: white;
+}
+
+/* Dark theme transaction badges for bulk upload only */
+body.dark .bulk-upload-interface .transaction-category,
+.dark .bulk-upload-interface .transaction-category {
+  background-color: #4299e1;
+  color: white;
+}
+
+body.dark .bulk-upload-interface .transaction-payment,
+.dark .bulk-upload-interface .transaction-payment {
+  background-color: #718096;
+  color: white;
+}
+
+/* Invalid Transactions */
+.invalid-transactions {
+  margin-bottom: 20px;
+  padding: 16px;
+  border-radius: 8px;
+  border: 1px solid #dc3545;
+}
+
+/* Light theme invalid transactions */
+body:not(.dark) .invalid-transactions,
+.light .invalid-transactions {
+  background-color: #f8d7da;
+}
+
+/* Dark theme invalid transactions */
+body.dark .invalid-transactions,
+.dark .invalid-transactions {
+  background-color: #722c2c;
+}
+
+.invalid-transactions h4 {
+  margin-top: 0;
+  margin-bottom: 12px;
+  color: #dc3545;
+  font-size: 16px;
+}
+
+.invalid-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.invalid-transaction {
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+/* Light theme invalid transaction */
+body:not(.dark) .invalid-transaction,
+.light .invalid-transaction {
+  background-color: rgba(220, 53, 69, 0.1);
+}
+
+/* Dark theme invalid transaction */
+body.dark .invalid-transaction,
+.dark .invalid-transaction {
+  background-color: rgba(220, 53, 69, 0.2);
+}
+
+.invalid-details {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.invalid-index {
+  font-weight: 600;
+  color: #dc3545;
+}
+
+.invalid-description {
+  flex: 1;
+  opacity: 0.8;
+}
+
+.invalid-errors {
+  font-size: 12px;
+  color: #dc3545;
+  font-weight: 500;
+}
+
+/* Bulk Actions */
+.bulk-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-top: 20px;
+}
+
+.bulk-save-btn,
+.bulk-reset-btn {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 14px;
+}
+
+.bulk-save-btn {
+  background-color: #28a745;
+  color: white;
+}
+
+.bulk-save-btn:hover:not(:disabled) {
+  background-color: #218838;
+  transform: translateY(-2px);
+}
+
+.bulk-save-btn:disabled {
+  background-color: #6c757d;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.bulk-reset-btn {
+  background-color: #6c757d;
+  color: white;
+}
+
+.bulk-reset-btn:hover {
+  background-color: #5a6268;
+  transform: translateY(-2px);
+}
+
+/* Dark theme bulk actions */
+body.dark .bulk-save-btn,
+.dark .bulk-save-btn {
+  background-color: #48bb78;
+}
+
+body.dark .bulk-save-btn:hover:not(:disabled),
+.dark .bulk-save-btn:hover:not(:disabled) {
+  background-color: #38a169;
+}
+
+body.dark .bulk-reset-btn,
+.dark .bulk-reset-btn {
+  background-color: #718096;
+}
+
+body.dark .bulk-reset-btn:hover,
+.dark .bulk-reset-btn:hover {
+  background-color: #4a5568;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .mode-options {
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .bulk-summary {
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .summary-item {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .bulk-transaction-main {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+  
+  .bulk-transaction-info {
+    flex-direction: column;
+    gap: 4px;
+  }
+  
+  .bulk-actions {
+    flex-direction: column;
+  }
+  
+  .bulk-save-btn,
+  .bulk-reset-btn {
+    width: 100%;
+  }
+}
+
+/* ...existing styles... */

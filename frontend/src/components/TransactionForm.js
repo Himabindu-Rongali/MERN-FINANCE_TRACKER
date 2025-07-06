@@ -34,6 +34,13 @@ const TransactionForm = ({ refreshTransactions, handleAddTransaction }) => {
   const [extractionSuccess, setExtractionSuccess] = useState(false);
   const [isDragOver, setIsDragOver] = useState(false);
   
+  // PDF bulk upload state
+  const [uploadMode, setUploadMode] = useState('single'); // 'single' or 'bulk'
+  const [bulkExtractedData, setBulkExtractedData] = useState(null);
+  const [selectedTransactions, setSelectedTransactions] = useState([]);
+  const [bulkSaving, setBulkSaving] = useState(false);
+  const [bulkSuccess, setBulkSuccess] = useState('');
+  
   // Form validation state
   const [validationErrors, setValidationErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -131,6 +138,13 @@ const TransactionForm = ({ refreshTransactions, handleAddTransaction }) => {
     const uploadedFile = e.target.files[0];
     if (!uploadedFile) return;
     
+    // Route to appropriate upload handler based on mode
+    if (uploadMode === 'bulk') {
+      await handleBulkPDFUpload(uploadedFile);
+      return;
+    }
+    
+    // Continue with single transaction upload for images and single PDFs
     // File validation
     const maxSize = 10 * 1024 * 1024; // 10MB
     const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'application/pdf'];
@@ -277,7 +291,13 @@ const TransactionForm = ({ refreshTransactions, handleAddTransaction }) => {
     const files = e.dataTransfer.files;
     if (files.length > 0) {
       const file = files[0];
-      const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'application/pdf'];
+      let allowedTypes;
+      
+      if (uploadMode === 'bulk') {
+        allowedTypes = ['application/pdf'];
+      } else {
+        allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'application/pdf'];
+      }
       
       if (allowedTypes.includes(file.type)) {
         // Create synthetic event for existing upload handler
@@ -288,7 +308,10 @@ const TransactionForm = ({ refreshTransactions, handleAddTransaction }) => {
         };
         handleFileUpload(syntheticEvent);
       } else {
-        setUploadError('Please upload only images (JPEG, PNG, GIF, WebP) or PDF files.');
+        const errorMsg = uploadMode === 'bulk' 
+          ? 'Please upload a PDF file for bulk transaction import.'
+          : 'Please upload only images (JPEG, PNG, GIF, WebP) or PDF files.';
+        setUploadError(errorMsg);
         setTimeout(() => setUploadError(''), 5000);
       }
     }
@@ -322,6 +345,153 @@ const TransactionForm = ({ refreshTransactions, handleAddTransaction }) => {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   };
 
+  /**
+   * Handle PDF bulk upload for transaction history
+   */
+  const handleBulkPDFUpload = async (uploadedFile) => {
+    if (!uploadedFile) return;
+    
+    // File validation
+    if (uploadedFile.type !== 'application/pdf') {
+      setUploadError('Please upload a PDF file for bulk transaction import');
+      setTimeout(() => setUploadError(''), 5000);
+      return;
+    }
+    
+    const maxSize = 10 * 1024 * 1024; // 10MB
+    if (uploadedFile.size > maxSize) {
+      setUploadError('File size must be less than 10MB');
+      setTimeout(() => setUploadError(''), 5000);
+      return;
+    }
+    
+    setFile(uploadedFile);
+    setUploading(true);
+    setUploadError('');
+    setBulkExtractedData(null);
+    setBulkSuccess('');
+    
+    const formData = new FormData();
+    formData.append('file', uploadedFile);
+    
+    try {
+      const response = await axios.post(
+        'http://localhost:5000/transactions/upload/upload-pdf-table',
+        formData,
+        {
+          headers: { 'Content-Type': 'multipart/form-data' },
+          timeout: 60000, // 60 second timeout
+        }
+      );
+      
+      if (response.data.success) {
+        setBulkExtractedData(response.data.data);
+        setSelectedTransactions(response.data.data.validTransactions.map((_, index) => index));
+        setBulkSuccess(`Successfully extracted ${response.data.data.totalFound} transactions from PDF`);
+      } else {
+        setUploadError('Failed to extract transactions from PDF');
+      }
+    } catch (error) {
+      console.error('Bulk PDF upload error:', error);
+      setUploadError(
+        error.response?.data?.message || 
+        error.code === 'ECONNABORTED' ? 'Upload timeout - please try again with a smaller file' :
+        'Failed to process PDF. Please ensure it contains readable transaction data.'
+      );
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  /**
+   * Handle saving bulk transactions to database
+   */
+  const handleBulkSave = async () => {
+    if (!bulkExtractedData || selectedTransactions.length === 0) {
+      setUploadError('No transactions selected for saving');
+      return;
+    }
+    
+    setBulkSaving(true);
+    setUploadError('');
+    
+    const transactionsToSave = selectedTransactions.map(index => 
+      bulkExtractedData.validTransactions[index]
+    );
+    
+    try {
+      // Save transactions one by one
+      const savePromises = transactionsToSave.map(transaction => 
+        axios.post('http://localhost:5000/transactions', transaction)
+      );
+      
+      await Promise.all(savePromises);
+      
+      // Success - reset form and notify parent
+      setBulkSuccess(`Successfully saved ${transactionsToSave.length} transactions!`);
+      setBulkExtractedData(null);
+      setSelectedTransactions([]);
+      setFile(null);
+      setUploadMode('single');
+      
+      if (handleAddTransaction) {
+        handleAddTransaction();
+      }
+      
+      if (refreshTransactions) {
+        refreshTransactions();
+      }
+      
+      setTimeout(() => setBulkSuccess(''), 5000);
+      
+    } catch (error) {
+      console.error('Error saving bulk transactions:', error);
+      setUploadError('Failed to save some transactions. Please try again.');
+    } finally {
+      setBulkSaving(false);
+    }
+  };
+
+  /**
+   * Toggle transaction selection for bulk upload
+   */
+  const toggleTransactionSelection = (index) => {
+    setSelectedTransactions(prev => 
+      prev.includes(index) 
+        ? prev.filter(i => i !== index)
+        : [...prev, index]
+    );
+  };
+
+  /**
+   * Select or deselect all transactions
+   */
+  const toggleAllTransactions = () => {
+    if (selectedTransactions.length === bulkExtractedData.validTransactions.length) {
+      setSelectedTransactions([]);
+    } else {
+      setSelectedTransactions(bulkExtractedData.validTransactions.map((_, index) => index));
+    }
+  };
+
+  /**
+   * Reset bulk upload state
+   */
+  const resetBulkUpload = () => {
+    setBulkExtractedData(null);
+    setSelectedTransactions([]);
+    setFile(null);
+    setUploadError('');
+    setBulkSuccess('');
+    setUploadMode('single');
+    
+    // Clear the file input
+    const fileInput = document.querySelector('.file-upload-input');
+    if (fileInput) {
+      fileInput.value = '';
+    }
+  };
+
   return (
     <div className={`transaction-form-container ${theme}`}>
       {/* Back navigation */}
@@ -342,6 +512,45 @@ const TransactionForm = ({ refreshTransactions, handleAddTransaction }) => {
       
       <h2 className="form-section-title">Add New Transaction</h2>
       
+      {/* Upload Mode Selector */}
+      <div className="upload-mode-selector">
+        <div className="mode-options">
+          <label className={`mode-option ${uploadMode === 'single' ? 'active' : ''}`}>
+            <input
+              type="radio"
+              name="uploadMode"
+              value="single"
+              checked={uploadMode === 'single'}
+              onChange={(e) => {
+                setUploadMode(e.target.value);
+                resetBulkUpload();
+              }}
+            />
+            <span className="mode-icon">📄</span>
+            <span className="mode-text">Single Transaction</span>
+            <span className="mode-desc">Upload receipt or add manually</span>
+          </label>
+          
+          <label className={`mode-option ${uploadMode === 'bulk' ? 'active' : ''}`}>
+            <input
+              type="radio"
+              name="uploadMode"
+              value="bulk"
+              checked={uploadMode === 'bulk'}
+              onChange={(e) => {
+                setUploadMode(e.target.value);
+                setFile(null);
+                setUploadError('');
+                setExtractionSuccess(false);
+              }}
+            />
+            <span className="mode-icon">📊</span>
+            <span className="mode-text">Bulk Upload</span>
+            <span className="mode-desc">Upload transaction history PDF</span>
+          </label>
+        </div>
+      </div>
+      
       {/* Global form error */}
       {validationErrors.submit && (
         <div className="form-error">
@@ -358,16 +567,22 @@ const TransactionForm = ({ refreshTransactions, handleAddTransaction }) => {
           onDragLeave={handleDragLeave}
           onDrop={handleDrop}
         >
-          <div className="file-upload-icon">📄</div>
+          <div className="file-upload-icon">
+            {uploadMode === 'bulk' ? '📊' : '📄'}
+          </div>
           <div className="file-upload-text">
-            {file ? 'Change Document' : 'Upload Receipt or Document'}
+            {file ? 'Change Document' : 
+             uploadMode === 'bulk' ? 'Upload Transaction History PDF' : 'Upload Receipt or Document'}
           </div>
           <div className="file-upload-subtext">
-            Drag & drop or click to browse • Images & PDFs • Max 10MB
+            {uploadMode === 'bulk' 
+              ? 'Drag & drop or click to browse • PDF files only • Max 10MB'
+              : 'Drag & drop or click to browse • Images & PDFs • Max 10MB'
+            }
           </div>
           <input 
             type="file" 
-            accept="image/*,.pdf" 
+            accept={uploadMode === 'bulk' ? '.pdf' : 'image/*,.pdf'} 
             onChange={handleFileUpload} 
             disabled={uploading}
             className="file-upload-input"
@@ -404,7 +619,20 @@ const TransactionForm = ({ refreshTransactions, handleAddTransaction }) => {
         {uploading && (
           <div className="upload-progress">
             <div className="upload-spinner"></div>
-            <div>Extracting transaction data from document...</div>
+            <div>
+              {uploadMode === 'bulk' 
+                ? 'Extracting transactions from PDF...'
+                : 'Extracting transaction data from document...'
+              }
+            </div>
+          </div>
+        )}
+
+        {/* Bulk Upload Success */}
+        {bulkSuccess && (
+          <div className="extraction-success">
+            <div>✅</div>
+            <div>{bulkSuccess}</div>
           </div>
         )}
 
@@ -424,97 +652,341 @@ const TransactionForm = ({ refreshTransactions, handleAddTransaction }) => {
           </div>
         )}
 
-        {/* Amount Field */}
-        <label>
-          Amount: *
-          <input
-            type="number"
-            value={amount}
-            onChange={(e) => setAmount(e.target.value)}
-            required
-            placeholder="Enter amount"
-            min="0"
-            step="0.01"
-            className={validationErrors.amount ? 'error' : ''}
-          />
-          {validationErrors.amount && (
-            <span className="field-error">{validationErrors.amount}</span>
-          )}
-        </label>
+        {/* Bulk Upload Interface */}
+        {uploadMode === 'bulk' && bulkExtractedData && (
+          <div className="bulk-upload-interface">
+            <h3>Review Extracted Transactions</h3>
+            
+            {/* Summary */}
+            <div className="bulk-summary">
+              <div className="summary-item">
+                <span className="summary-label">Total Found:</span>
+                <span className="summary-value">{bulkExtractedData.totalFound}</span>
+              </div>
+              <div className="summary-item">
+                <span className="summary-label">Valid:</span>
+                <span className="summary-value">{bulkExtractedData.totalValid}</span>
+              </div>
+              <div className="summary-item">
+                <span className="summary-label">Invalid:</span>
+                <span className="summary-value">{bulkExtractedData.totalInvalid}</span>
+              </div>
+              <div className="summary-item">
+                <span className="summary-label">Selected:</span>
+                <span className="summary-value">{selectedTransactions.length}</span>
+              </div>
+            </div>
 
-        {/* Category Field */}
-        <label>
-          Category: *
-          <input
-            type="text"
-            value={category}
-            onChange={(e) => setCategory(e.target.value)}
-            required
-            placeholder="e.g., Groceries, Utilities, Entertainment"
-            className={validationErrors.category ? 'error' : ''}
-          />
-          {validationErrors.category && (
-            <span className="field-error">{validationErrors.category}</span>
-          )}
-        </label>
+            {/* Transaction Selection */}
+            {bulkExtractedData.validTransactions.length > 0 && (
+              <div className="transaction-selection">
+                <div className="selection-header">
+                  <label className="select-all">
+                    <input
+                      type="checkbox"
+                      checked={selectedTransactions.length === bulkExtractedData.validTransactions.length}
+                      onChange={toggleAllTransactions}
+                    />
+                    Select All ({bulkExtractedData.validTransactions.length})
+                  </label>
+                </div>
 
-        {/* Date Field */}
-        <label>
-          Date: *
-          <input
-            type="date"
-            value={date}
-            onChange={(e) => setDate(e.target.value)}
-            required
-            className={validationErrors.date ? 'error' : ''}
-          />
-          {validationErrors.date && (
-            <span className="field-error">{validationErrors.date}</span>
-          )}
-        </label>
+                <div className="transaction-list">
+                  {bulkExtractedData.validTransactions.map((transaction, index) => (
+                    <div key={index} className="bulk-transaction-item">
+                      <label className="transaction-checkbox">
+                        <input
+                          type="checkbox"
+                          checked={selectedTransactions.includes(index)}
+                          onChange={() => toggleTransactionSelection(index)}
+                        />
+                        <div className="transaction-details">
+                          <div className="bulk-transaction-main">
+                            <span className="transaction-date">{transaction.date}</span>
+                            <span className="transaction-amount">${transaction.amount.toFixed(2)}</span>
+                          </div>
+                          <div className="bulk-transaction-info">
+                            <span className="transaction-description">{transaction.description}</span>
+                            <span className="transaction-category">{transaction.category}</span>
+                            <span className="transaction-payment">{transaction.paymentMethod}</span>
+                          </div>
+                        </div>
+                      </label>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
-        {/* Description Field */}
-        <label>
-          Description:
-          <input
-            type="text"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            placeholder="Brief description (optional)"
-            maxLength="200"
-          />
-        </label>
+            {/* Invalid Transactions */}
+            {bulkExtractedData.invalidTransactions.length > 0 && (
+              <div className="invalid-transactions">
+                <h4>Invalid Transactions ({bulkExtractedData.invalidTransactions.length})</h4>
+                <div className="invalid-list">
+                  {bulkExtractedData.invalidTransactions.map((transaction, index) => (
+                    <div key={index} className="invalid-transaction">
+                      <div className="invalid-details">
+                        <span className="invalid-index">#{transaction.index}</span>
+                        <span className="invalid-description">{transaction.description || 'N/A'}</span>
+                        <span className="invalid-errors">{transaction.errors.join(', ')}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
-        {/* Payment Method Dropdown */}
-        <label>
-          Payment Method: *
-          <select
-            value={paymentMethod}
-            onChange={(e) => setPaymentMethod(e.target.value)}
-            required
-            className={validationErrors.paymentMethod ? 'error' : ''}
-          >
-            <option value="">Select Payment Method</option>
-            <option value="Cash">Cash</option>
-            <option value="Online Payment">Online Payment</option>
-          </select>
-          {validationErrors.paymentMethod && (
-            <span className="field-error">{validationErrors.paymentMethod}</span>
-          )}
-        </label>
-        
-        {/* Submit Button */}
-        <div className="form-actions">
-          <button 
-            type="submit" 
-            className="add-transaction-btn"
-            disabled={isSubmitting || uploading}
-          >
-            <span className="btn-icon">💳</span>
-            {isSubmitting ? 'Adding Transaction...' : 'Add Transaction'}
-          </button>
-        </div>
+            {/* Bulk Actions */}
+            <div className="bulk-actions">
+              <button
+                type="button"
+                onClick={handleBulkSave}
+                disabled={selectedTransactions.length === 0 || bulkSaving}
+                className="bulk-save-btn"
+              >
+                {bulkSaving ? 'Saving Transactions...' : `Save ${selectedTransactions.length} Transactions`}
+              </button>
+              <button
+                type="button"
+                onClick={resetBulkUpload}
+                className="bulk-reset-btn"
+              >
+                Reset
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Manual Transaction Form - Only show in single mode */}
+        {uploadMode === 'single' && (
+          <>
+            {/* Amount Field */}
+            <label>
+              Amount: *
+              <input
+                type="number"
+                value={amount}
+                onChange={(e) => setAmount(e.target.value)}
+                required
+                placeholder="Enter amount"
+                min="0"
+                step="0.01"
+                className={validationErrors.amount ? 'error' : ''}
+              />
+              {validationErrors.amount && (
+                <span className="field-error">{validationErrors.amount}</span>
+              )}
+            </label>
+
+            {/* Category Field */}
+            <label>
+              Category: *
+              <input
+                type="text"
+                value={category}
+                onChange={(e) => setCategory(e.target.value)}
+                required
+                placeholder="e.g., Groceries, Utilities, Entertainment"
+                className={validationErrors.category ? 'error' : ''}
+              />
+              {validationErrors.category && (
+                <span className="field-error">{validationErrors.category}</span>
+              )}
+            </label>
+
+            {/* Date Field */}
+            <label>
+              Date: *
+              <input
+                type="date"
+                value={date}
+                onChange={(e) => setDate(e.target.value)}
+                required
+                className={validationErrors.date ? 'error' : ''}
+              />
+              {validationErrors.date && (
+                <span className="field-error">{validationErrors.date}</span>
+              )}
+            </label>
+
+            {/* Description Field */}
+            <label>
+              Description:
+              <input
+                type="text"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder="Brief description (optional)"
+                maxLength="200"
+              />
+            </label>
+
+            {/* Payment Method Dropdown */}
+            <label>
+              Payment Method: *
+              <select
+                value={paymentMethod}
+                onChange={(e) => setPaymentMethod(e.target.value)}
+                required
+                className={validationErrors.paymentMethod ? 'error' : ''}
+              >
+                <option value="">Select Payment Method</option>
+                <option value="Cash">Cash</option>
+                <option value="Online Payment">Online Payment</option>
+              </select>
+              {validationErrors.paymentMethod && (
+                <span className="field-error">{validationErrors.paymentMethod}</span>
+              )}
+            </label>
+            
+            {/* Submit Button */}
+            <div className="form-actions">
+              <button 
+                type="submit" 
+                className="add-transaction-btn"
+                disabled={isSubmitting || uploading}
+              >
+                <span className="btn-icon">💳</span>
+                {isSubmitting ? 'Adding Transaction...' : 'Add Transaction'}
+              </button>
+            </div>
+          </>
+        )}
       </form>
+
+      {/* Bulk Upload Section (PDF only) */}
+      {uploadMode === 'bulk' && (
+        <div className="bulk-upload-section">
+          <h3>Bulk Upload - PDF Extraction</h3>
+          
+          {/* PDF File Upload */}
+          <div 
+            className={`file-upload-container ${isDragOver ? 'drag-over' : ''}`}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
+          >
+            <div className="file-upload-icon">📄</div>
+            <div className="file-upload-text">
+              {file ? 'Change PDF Document' : 'Upload PDF Document'}
+            </div>
+            <div className="file-upload-subtext">
+              Drag & drop or click to browse • PDF only • Max 10MB
+            </div>
+            <input 
+              type="file" 
+              accept=".pdf" 
+              onChange={(e) => handleBulkPDFUpload(e.target.files[0])} 
+              disabled={uploading}
+              className="file-upload-input"
+            />
+            {!file && (
+              <div className="file-upload-button">
+                Choose PDF File
+              </div>
+            )}
+          </div>
+
+          {/* File Preview */}
+          {file && !uploading && (
+            <div className="file-preview">
+              <div className="file-preview-icon">
+                {file.type.startsWith('image/') ? '🖼️' : '📄'}
+              </div>
+              <div className="file-preview-info">
+                <div className="file-preview-name">{file.name}</div>
+                <div className="file-preview-size">{formatFileSize(file.size)}</div>
+              </div>
+              <button 
+                type="button" 
+                onClick={handleRemoveFile}
+                className="file-preview-remove"
+                title="Remove file"
+              >
+                ×
+              </button>
+            </div>
+          )}
+
+          {/* Upload Progress */}
+          {uploading && (
+            <div className="upload-progress">
+              <div className="upload-spinner"></div>
+              <div>Extracting transactions from PDF...</div>
+            </div>
+          )}
+
+          {/* Success Message */}
+          {bulkSuccess && (
+            <div className="extraction-success">
+              <div>✅</div>
+              <div>{bulkSuccess}</div>
+            </div>
+          )}
+
+          {/* Error Message */}
+          {uploadError && (
+            <div className="upload-error">
+              <div>❌</div>
+              <div>{uploadError}</div>
+            </div>
+          )}
+
+          {/* Transaction Selection for Bulk Upload */}
+          {bulkExtractedData && (
+            <div className="transaction-selection">
+              <div className="selection-header">
+                <div>Select Transactions for Upload</div>
+                <button 
+                  type="button" 
+                  onClick={toggleAllTransactions}
+                  className="select-all-btn"
+                  title={selectedTransactions.length === bulkExtractedData.validTransactions.length ? 'Deselect All' : 'Select All'}
+                >
+                  {selectedTransactions.length === bulkExtractedData.validTransactions.length ? 'Deselect All' : 'Select All'}
+                </button>
+              </div>
+              
+              <div className="transaction-list">
+                {bulkExtractedData.validTransactions.map((transaction, index) => (
+                  <div 
+                    key={index} 
+                    className={`bulk-transaction-item ${selectedTransactions.includes(index) ? 'selected' : ''}`}
+                    onClick={() => toggleTransactionSelection(index)}
+                    title={selectedTransactions.includes(index) ? 'Click to deselect' : 'Click to select'}
+                  >
+                    <div className="bulk-transaction-info">
+                      <div>{transaction.category} - {transaction.amount} {transaction.currency}</div>
+                      <div>{transaction.date} {transaction.time}</div>
+                    </div>
+                    {selectedTransactions.includes(index) && (
+                      <div className="checkmark">✔️</div>
+                    )}
+                  </div>
+                ))}
+              </div>
+              
+              <div className="bulk-actions">
+                <button 
+                  type="button" 
+                  onClick={handleBulkSave}
+                  className="save-bulk-btn"
+                  disabled={bulkSaving}
+                >
+                  {bulkSaving ? 'Saving...' : 'Save Selected Transactions'}
+                </button>
+                <button 
+                  type="button" 
+                  onClick={resetBulkUpload}
+                  className="reset-bulk-btn"
+                >
+                  Reset
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 };
