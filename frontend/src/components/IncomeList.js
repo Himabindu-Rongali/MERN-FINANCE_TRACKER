@@ -67,17 +67,24 @@ const IncomeList = () => {
         <div className="income-list">
           {currentMonthIncomes.map((income) => (
             <div key={income._id} className="income-card">
-              <div className="income-amount">₹{income.amount}</div>
-              <div className="income-details">
-                <span>{income.source}</span>
-                <span className="income-date">{new Date(income.date).toLocaleDateString()}</span>
+              <div className="income-left">
+                <div className="income-info">
+                  <div className="income-amount">₹{income.amount.toLocaleString()}</div>
+                  <div className="income-source">{income.source}</div>
+                </div>
               </div>
-              <button
-                className="income-delete-button"
-                onClick={() => handleDelete(income._id)}
-              >
-                Delete
-              </button>
+              <div className="income-right">
+                <div className="income-date">
+                  <span>{new Date(income.date).toLocaleDateString()}</span>
+                </div>
+                <button
+                  className="income-delete-button"
+                  onClick={() => handleDelete(income._id)}
+                  title="Delete income"
+                >
+                  Delete
+                </button>
+              </div>
             </div>
           ))}
         </div>
@@ -91,7 +98,9 @@ const IncomeList = () => {
 
       {!showForm && (
         <div className="income-add-btn-container">
-          <button className="income-add-button" onClick={() => setShowForm(true)}>Add Income</button>
+          <button className="income-add-button" onClick={() => setShowForm(true)}>
+            Add Income
+          </button>
         </div>
       )}
     </div>

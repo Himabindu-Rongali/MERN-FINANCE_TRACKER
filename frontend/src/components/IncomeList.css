@@ -2,79 +2,112 @@
 
 /* Container */
 .income-container {
-  max-width: 1200px;   /* Increased width for laptop/desktop */
-  margin: 2.5rem auto;
+  max-width: 1200px;
+  margin: 2rem auto;
   padding: 2.5rem 3rem;
   border-radius: 16px;
-  font-family: 'Segoe UI', 'Arial', sans-serif;
-  transition: background 0.3s, box-shadow 0.3s;
-  box-shadow: 0 8px 40px rgba(60, 60, 90, 0.09);
+  font-family: 'Inter', 'Segoe UI', 'Roboto', system-ui, -apple-system, sans-serif;
+  transition: all 0.3s ease;
   border: none;
+  position: relative;
+}
+
+.income-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #7f4c47 0%, #a0624a 100%);
 }
 
 /* Light Theme */
 body:not(.dark) .income-container,
 .light .income-container {
-  background: #fff;
-  box-shadow: 0 8px 40px rgba(60, 60, 90, 0.09);
-  border: 1px solid #e4e7ec;
+  background: #ffffff;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(226, 232, 240, 0.8);
 }
 
 /* Dark Theme */
 body.dark .income-container,
 .dark .income-container {
-  background: #232336;
-  box-shadow: 0 8px 40px rgba(0,0,0,0.22);
-  border: 1px solid #37375a;
+  background: #1e293b;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(51, 65, 85, 0.8);
 }
 
 /* Heading */
 .income-heading {
-  font-size: 2.4rem;
+  font-size: 2.5rem;
   font-weight: 700;
-  letter-spacing: 0.01em;
+  letter-spacing: -0.02em;
   margin-bottom: 2.5rem;
   text-align: center;
-  border-bottom: 2px solid;
-  padding-bottom: 0.7rem;
+  position: relative;
+  padding-bottom: 1rem;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  line-height: 1.2;
+}
+
+.income-heading::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80px;
+  height: 4px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, #7f4c47 0%, #a0624a 100%);
 }
 
 body:not(.dark) .income-heading,
 .light .income-heading {
-  color: #7c2d12;
-  border-bottom-color: #e0e0e0;
+  color: #0f172a;
 }
 
 body.dark .income-heading,
 .dark .income-heading {
-  color: #f7b267;
-  border-bottom-color: #37375a;
+  color: #f1f5f9;
 }
 
 /* Success Message */
 .income-success-message {
-  padding: 1.1rem;
-  border-radius: 10px;
-  margin-bottom: 2.2rem;
+  padding: 1.2rem 1.8rem;
+  border-radius: 12px;
+  margin-bottom: 2.5rem;
   font-weight: 600;
   text-align: center;
-  font-size: 1.13rem;
+  font-size: 1rem;
   letter-spacing: 0.01em;
-  transition: background 0.3s, color 0.3s;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.income-success-message::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  background: linear-gradient(135deg, #7f4c47 0%, #a0624a 100%);
 }
 
 body:not(.dark) .income-success-message,
 .light .income-success-message {
-  background: linear-gradient(90deg, #d4f8e8 0%, #e9ffe6 100%);
-  color: #218838;
-  border: 1px solid #b2f2d7;
+  background: #fff3cd;
+  color: #7f4c47;
+  border: 1px solid #ffeaa7;
 }
 
 body.dark .income-success-message,
 .dark .income-success-message {
-  background: linear-gradient(90deg, #284b3a 0%, #335e4a 100%);
-  color: #5cdb95;
-  border: 1px solid #5cdb95;
+  background: #2d2520;
+  color: #e6a070;
+  border: 1px solid #7f4c47;
 }
 
 /* Add Button Container */
@@ -85,34 +118,52 @@ body.dark .income-success-message,
 
 /* Add Button */
 .income-add-button {
-  padding: 1rem 2.5rem;
-  font-size: 1.15rem;
+  padding: 1.2rem 2.5rem;
+  font-size: 1rem;
   font-weight: 600;
   border: none;
-  border-radius: 10px;
+  border-radius: 12px;
   cursor: pointer;
-  background: linear-gradient(90deg, #a94442 0%, #b86b3c 100%);
-  color: #fff;
-  box-shadow: 0 2px 8px rgba(169, 68, 66, 0.09);
-  transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  position: relative;
+  overflow: hidden;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
 }
 
 body:not(.dark) .income-add-button,
 .light .income-add-button {
-  background: linear-gradient(90deg, #a94442 0%, #b86b3c 100%);
-  color: #fff;
+  background: linear-gradient(135deg, #7f4c47 0%, #a0624a 100%);
+  color: #ffffff;
+  box-shadow: 0 4px 16px rgba(127, 76, 71, 0.3);
 }
 
 body.dark .income-add-button,
 .dark .income-add-button {
-  background: linear-gradient(90deg, #f7b267 0%, #e67e22 100%);
-  color: #232336;
+  background: linear-gradient(135deg, #e6a070 0%, #ff9776 100%);
+  color: #1a1a2e;
+  box-shadow: 0 4px 16px rgba(230, 160, 112, 0.3);
 }
 
 .income-add-button:hover {
-  transform: translateY(-2px) scale(1.04);
-  box-shadow: 0 4px 16px rgba(169, 68, 66, 0.15);
-  filter: brightness(1.07);
+  transform: translateY(-2px);
+}
+
+body:not(.dark) .income-add-button:hover,
+.light .income-add-button:hover {
+  box-shadow: 0 8px 24px rgba(127, 76, 71, 0.4);
+}
+
+body.dark .income-add-button:hover {
+  box-shadow: 0 8px 24px rgba(230, 160, 112, 0.4);
+}
+
+.income-add-button:active {
+  transform: translateY(0);
 }
 
 /* Form Container */
@@ -122,22 +173,28 @@ body.dark .income-add-button,
 
 /* No Data Message */
 .income-no-data {
-  font-style: italic;
   text-align: center;
-  padding: 1.5rem 0;
-  font-size: 1.13rem;
-  color: #aaa;
+  padding: 2rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 500;
   letter-spacing: 0.01em;
+  border-radius: 12px;
+  position: relative;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
 }
 
 body:not(.dark) .income-no-data,
 .light .income-no-data {
-  color: #999;
+  color: #64748b;
+  background: #f8fafc;
+  border: 1px solid rgba(226, 232, 240, 0.6);
 }
 
 body.dark .income-no-data,
 .dark .income-no-data {
-  color: #a0a0a0;
+  color: #94a3b8;
+  background: #1e293b;
+  border: 1px solid rgba(71, 85, 105, 0.6);
 }
 
 /* Income List */
@@ -149,110 +206,366 @@ body.dark .income-no-data,
 
 /* Income Card */
 .income-card {
-  padding: 1.4rem 2.2rem;
+  padding: 1.8rem 2rem;
   border-radius: 12px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  transition: box-shadow 0.3s, background 0.3s;
-  box-shadow: 0 2px 16px rgba(60, 60, 90, 0.07);
-  border: none;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
 }
 
 body:not(.dark) .income-card,
 .light .income-card {
-  background: #f8fafc;
-  border: 1px solid #e4e7ec;
+  background: #ffffff;
+  border: 1px solid rgba(226, 232, 240, 0.6);
+  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.06);
 }
 
 body.dark .income-card,
 .dark .income-card {
-  background: #2d2d44;
-  border: 1px solid #37375a;
+  background: #334155;
+  border: 1px solid rgba(71, 85, 105, 0.6);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+}
+
+.income-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  background: linear-gradient(135deg, #7f4c47 0%, #a0624a 100%);
+  transition: all 0.3s ease;
 }
 
 .income-card:hover {
-  box-shadow: 0 6px 24px rgba(60, 60, 90, 0.13);
+  transform: translateY(-3px);
+}
+
+body:not(.dark) .income-card:hover,
+.light .income-card:hover {
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.12);
+}
+
+body.dark .income-card:hover {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+}
+
+.income-card:hover::before {
+  width: 6px;
+}
+
+/* Income Left Section */
+.income-left {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex: 1;
+}
+
+/* Income Info */
+.income-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
 }
 
 /* Amount */
 .income-amount {
   font-weight: 700;
-  font-size: 1.4rem;
-  letter-spacing: 0.01em;
+  font-size: 1.6rem;
+  letter-spacing: -0.01em;
+  transition: all 0.3s ease;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
 }
 
 body:not(.dark) .income-amount,
 .light .income-amount {
-  color: #219150;
+  color: #7f4c47;
 }
 
 body.dark .income-amount,
 .dark .income-amount {
-  color: #6ecd70;
+  color: #e6a070;
 }
 
-/* Details */
-.income-details {
+.income-card:hover .income-amount {
+  transform: scale(1.02);
+}
+
+/* Source */
+.income-source {
+  font-size: 1rem;
+  font-weight: 500;
+  opacity: 0.8;
+  transition: all 0.3s ease;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+body:not(.dark) .income-source,
+.light .income-source {
+  color: #475569;
+}
+
+body.dark .income-source,
+.dark .income-source {
+  color: #cbd5e1;
+}
+
+.income-card:hover .income-source {
+  opacity: 1;
+}
+
+/* Income Right Section */
+.income-right {
   display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  min-width: 140px;
-  margin-left: 2rem;
-  gap: 0.2rem;
-}
-
-body:not(.dark) .income-details,
-.light .income-details {
-  color: #555;
-}
-
-body.dark .income-details,
-.dark .income-details {
-  color: #c2c2c2;
+  align-items: center;
+  gap: 1.5rem;
 }
 
 /* Date */
 .income-date {
-  font-size: 1rem;
-  margin-top: 2px;
-  color: #888;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  padding: 0.6rem 1rem;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+body:not(.dark) .income-date,
+.light .income-date {
+  color: #64748b;
+  background: #f8fafc;
+  border: 1px solid rgba(226, 232, 240, 0.6);
 }
 
 body.dark .income-date,
 .dark .income-date {
-  color: #a0a0a0;
+  color: #94a3b8;
+  background: #1e293b;
+  border: 1px solid rgba(71, 85, 105, 0.6);
+}
+
+.income-card:hover .income-date {
+  transform: scale(1.02);
+}
+
+body:not(.dark) .income-card:hover .income-date,
+.light .income-card:hover .income-date {
+  background: #f1f5f9;
+}
+
+body.dark .income-card:hover .income-date,
+.dark .income-card:hover .income-date {
+  background: #334155;
 }
 
 /* Delete Button */
 .income-delete-button {
-  padding: 0.7rem 1.6rem;
-  font-size: 1.05rem;
+  padding: 0.8rem;
+  font-size: 1rem;
   font-weight: 500;
   border: none;
   border-radius: 8px;
   cursor: pointer;
-  background: linear-gradient(90deg, #f44336 0%, #e57373 100%);
-  color: #fff;
-  transition: background 0.2s, transform 0.2s;
-  margin-left: 2.5rem;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  position: relative;
 }
 
 body:not(.dark) .income-delete-button,
 .light .income-delete-button {
-  background: linear-gradient(90deg, #f44336 0%, #e57373 100%);
-  color: #fff;
+  background: #fee2e2;
+  color: #dc2626;
+  border: 1px solid #fca5a5;
 }
 
 body.dark .income-delete-button,
 .dark .income-delete-button {
-  background: linear-gradient(90deg, #c62828 0%, #e57373 100%);
-  color: #fff;
+  background: #450a0a;
+  color: #ef4444;
+  border: 1px solid #dc2626;
 }
 
 .income-delete-button:hover {
-  transform: scale(1.08);
-  background: linear-gradient(90deg, #d32f2f 0%, #f44336 100%);
+  transform: scale(1.05);
 }
 
-/* No mobile styles! */
+body:not(.dark) .income-delete-button:hover,
+.light .income-delete-button:hover {
+  background: #fca5a5;
+  color: #ffffff;
+}
+
+body.dark .income-delete-button:hover,
+.dark .income-delete-button:hover {
+  background: #dc2626;
+  color: #ffffff;
+}
+
+.income-delete-button:active {
+  transform: scale(0.95);
+}
+
+/* Remove old styles */
+.income-details {
+  display: none;
+}
+
+/* Professional Responsive Design */
+@media (max-width: 1200px) {
+  .income-container {
+    max-width: 95%;
+    padding: 3rem 3rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .income-container {
+    margin: 1rem auto;
+    padding: 2.5rem 1.5rem;
+    border-radius: 20px;
+  }
+  
+  .income-heading {
+    font-size: 2.2rem;
+    margin-bottom: 2rem;
+  }
+  
+  .income-heading::after {
+    width: 80px;
+    height: 4px;
+  }
+  
+  .income-card {
+    padding: 1.5rem;
+    flex-direction: column;
+    gap: 1.5rem;
+    text-align: center;
+  }
+  
+  .income-left {
+    flex-direction: column;
+    gap: 1rem;
+    width: 100%;
+  }
+  
+  .income-right {
+    width: 100%;
+    justify-content: space-between;
+  }
+  
+  .income-amount {
+    font-size: 1.5rem;
+  }
+  
+  .income-source {
+    font-size: 0.9rem;
+  }
+  
+  .income-add-button {
+    padding: 1.2rem 2.5rem;
+    font-size: 1rem;
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .income-success-message {
+    font-size: 1rem;
+    padding: 1.2rem 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .income-container {
+    padding: 2rem 1rem;
+  }
+  
+  .income-heading {
+    font-size: 1.8rem;
+  }
+  
+  .income-card {
+    padding: 1.2rem;
+  }
+  
+  .income-icon {
+    width: 48px;
+    height: 48px;
+  }
+  
+  .income-amount {
+    font-size: 1.3rem;
+  }
+  
+  .income-date {
+    font-size: 0.85rem;
+    padding: 0.6rem 1rem;
+  }
+}
+
+/* Loading Animation */
+.income-loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 3rem 0;
+}
+
+.income-loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid rgba(127, 76, 71, 0.2);
+  border-top: 4px solid #7f4c47;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Smooth Transitions */
+* {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Focus States for Accessibility */
+.income-add-button:focus,
+.income-delete-button:focus {
+  outline: 2px solid #7f4c47;
+  outline-offset: 2px;
+}
+
+/* Print Styles */
+@media print {
+  .income-container {
+    box-shadow: none;
+    border: 1px solid #ddd;
+    background: white !important;
+  }
+  
+  .income-card {
+    box-shadow: none;
+    border: 1px solid #ddd;
+    background: white !important;
+  }
+  
+  .income-delete-button,
+  .income-add-button {
+    display: none;
+  }
+}

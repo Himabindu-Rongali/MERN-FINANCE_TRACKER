@@ -1328,4 +1328,168 @@ body.dark .bulk-reset-btn:hover,
   }
 }
 
+/* Transaction Item Header */
+.transaction-item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+/* Dark theme transaction item header */
+body.dark .transaction-item-header,
+.dark .transaction-item-header {
+  border-bottom-color: #4a5568;
+}
+
+.transaction-number {
+  font-weight: 600;
+  margin-left: 8px;
+  font-size: 14px;
+  color: #666;
+}
+
+/* Dark theme transaction number */
+body.dark .transaction-number,
+.dark .transaction-number {
+  color: #b0b0b0;
+}
+
+/* Edit Toggle Button */
+.edit-toggle-btn {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.edit-toggle-btn:hover {
+  background-color: #0056b3;
+  transform: translateY(-1px);
+}
+
+/* Dark theme edit toggle button */
+body.dark .edit-toggle-btn,
+.dark .edit-toggle-btn {
+  background-color: #4299e1;
+}
+
+body.dark .edit-toggle-btn:hover,
+.dark .edit-toggle-btn:hover {
+  background-color: #3182ce;
+}
+
+/* Transaction Edit Form */
+.transaction-edit-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+}
+
+/* Dark theme edit form */
+body.dark .transaction-edit-form,
+.dark .transaction-edit-form {
+  background-color: #2d3748;
+  border-color: #4a5568;
+}
+
+.edit-row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.edit-row label {
+  font-weight: 500;
+  font-size: 14px;
+  color: #333;
+}
+
+/* Dark theme edit row label */
+body.dark .edit-row label,
+.dark .edit-row label {
+  color: #e2e8f0;
+}
+
+.edit-input {
+  padding: 8px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 14px;
+  transition: border-color 0.2s ease;
+  background-color: white;
+}
+
+.edit-input:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+}
+
+/* Dark theme edit input */
+body.dark .edit-input,
+.dark .edit-input {
+  background-color: #1a202c;
+  border-color: #4a5568;
+  color: #e2e8f0;
+}
+
+body.dark .edit-input:focus,
+.dark .edit-input:focus {
+  border-color: #4299e1;
+  box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
+}
+
+/* Responsive Design for Edit Form */
+@media (min-width: 768px) {
+  .edit-row {
+    flex-direction: row;
+    align-items: center;
+    gap: 12px;
+  }
+  
+  .edit-row label {
+    min-width: 120px;
+    margin-bottom: 0;
+  }
+  
+  .edit-input {
+    flex: 1;
+  }
+}
+
+/* Update bulk transaction item styling */
+.bulk-transaction-item {
+  border-bottom: 1px solid #dee2e6;
+  padding: 16px;
+  background-color: white;
+  border-radius: 8px;
+  margin-bottom: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* Dark theme bulk transaction item */
+body.dark .bulk-transaction-item,
+.dark .bulk-transaction-item {
+  background-color: #2d3748;
+  border-bottom-color: #4a5568;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.bulk-transaction-item:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+}
+
 /* ...existing styles... */

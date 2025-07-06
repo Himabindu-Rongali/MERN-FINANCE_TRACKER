@@ -492,6 +492,44 @@ const TransactionForm = ({ refreshTransactions, handleAddTransaction }) => {
     }
   };
 
+  /**
+   * Handle editing a specific transaction in bulk upload
+   */
+  const handleEditTransaction = (index, field, value) => {
+    if (!bulkExtractedData) return;
+    
+    const updatedData = { ...bulkExtractedData };
+    const updatedTransaction = { ...updatedData.validTransactions[index] };
+    
+    // Update the specific field
+    if (field === 'amount') {
+      updatedTransaction.amount = parseFloat(value) || 0;
+    } else {
+      updatedTransaction[field] = value;
+    }
+    
+    // Update the transaction in the array
+    updatedData.validTransactions[index] = updatedTransaction;
+    
+    // Recalculate summary
+    updatedData.summary.totalAmount = updatedData.validTransactions.reduce((sum, t) => sum + t.amount, 0);
+    
+    setBulkExtractedData(updatedData);
+  };
+
+  /**
+   * Toggle edit mode for a specific transaction
+   */
+  const [editingTransactions, setEditingTransactions] = useState([]);
+  
+  const toggleEditMode = (index) => {
+    setEditingTransactions(prev => 
+      prev.includes(index) 
+        ? prev.filter(i => i !== index)
+        : [...prev, index]
+    );
+  };
+
   return (
     <div className={`transaction-form-container ${theme}`}>
       {/* Back navigation */}
@@ -694,12 +732,84 @@ const TransactionForm = ({ refreshTransactions, handleAddTransaction }) => {
                 <div className="transaction-list">
                   {bulkExtractedData.validTransactions.map((transaction, index) => (
                     <div key={index} className="bulk-transaction-item">
-                      <label className="transaction-checkbox">
-                        <input
-                          type="checkbox"
-                          checked={selectedTransactions.includes(index)}
-                          onChange={() => toggleTransactionSelection(index)}
-                        />
+                      <div className="transaction-item-header">
+                        <label className="transaction-checkbox">
+                          <input
+                            type="checkbox"
+                            checked={selectedTransactions.includes(index)}
+                            onChange={() => toggleTransactionSelection(index)}
+                          />
+                          <span className="transaction-number">#{index + 1}</span>
+                        </label>
+                        <button
+                          type="button"
+                          onClick={() => toggleEditMode(index)}
+                          className="edit-toggle-btn"
+                        >
+                          {editingTransactions.includes(index) ? 'Save' : 'Edit'}
+                        </button>
+                      </div>
+                      
+                      {editingTransactions.includes(index) ? (
+                        // Edit mode - input fields
+                        <div className="transaction-edit-form">
+                          <div className="edit-row">
+                            <label>Date:</label>
+                            <input
+                              type="date"
+                              value={transaction.date}
+                              onChange={(e) => handleEditTransaction(index, 'date', e.target.value)}
+                              className="edit-input"
+                            />
+                          </div>
+                          <div className="edit-row">
+                            <label>Amount:</label>
+                            <input
+                              type="number"
+                              value={transaction.amount}
+                              onChange={(e) => handleEditTransaction(index, 'amount', e.target.value)}
+                              className="edit-input"
+                              min="0"
+                              step="0.01"
+                            />
+                          </div>
+                          <div className="edit-row">
+                            <label>Description:</label>
+                            <input
+                              type="text"
+                              value={transaction.description}
+                              onChange={(e) => handleEditTransaction(index, 'description', e.target.value)}
+                              className="edit-input"
+                              placeholder="Transaction description"
+                            />
+                          </div>
+                          <div className="edit-row">
+                            <label>Category:</label>
+                            <input
+                              type="text"
+                              value={transaction.category}
+                              onChange={(e) => handleEditTransaction(index, 'category', e.target.value)}
+                              className="edit-input"
+                              placeholder="e.g., Groceries, Utilities"
+                            />
+                          </div>
+                          <div className="edit-row">
+                            <label>Payment Method:</label>
+                            <select
+                              value={transaction.paymentMethod}
+                              onChange={(e) => handleEditTransaction(index, 'paymentMethod', e.target.value)}
+                              className="edit-input"
+                            >
+                              <option value="Cash">Cash</option>
+                              <option value="Credit Card">Credit Card</option>
+                              <option value="Debit Card">Debit Card</option>
+                              <option value="Online Payment">Online Payment</option>
+                              <option value="Other">Other</option>
+                            </select>
+                          </div>
+                        </div>
+                      ) : (
+                        // View mode - display only
                         <div className="transaction-details">
                           <div className="bulk-transaction-main">
                             <span className="transaction-date">{transaction.date}</span>
@@ -707,11 +817,11 @@ const TransactionForm = ({ refreshTransactions, handleAddTransaction }) => {
                           </div>
                           <div className="bulk-transaction-info">
                             <span className="transaction-description">{transaction.description}</span>
-                            <span className="transaction-category">{transaction.category}</span>
-                            <span className="transaction-payment">{transaction.paymentMethod}</span>
+                            <span className="bulk-upload-interface transaction-category">{transaction.category}</span>
+                            <span className="bulk-upload-interface transaction-payment">{transaction.paymentMethod}</span>
                           </div>
                         </div>
-                      </label>
+                      )}
                     </div>
                   ))}
                 </div>
