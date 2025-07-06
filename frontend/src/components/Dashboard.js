@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
-import { Line, Pie, Bar, Doughnut, Radar } from 'react-chartjs-2';
+import { Line, Bar } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
   ArcElement,
@@ -12,9 +12,9 @@ import {
   LineElement,
   PointElement,
   BarElement,
-  RadialLinearScale,
   Filler
 } from 'chart.js';
+
 import { ThemeContext } from './ThemeContext';
 import './Dashboard.css';
 
@@ -28,7 +28,6 @@ ChartJS.register(
   LineElement,
   PointElement,
   BarElement,
-  RadialLinearScale,
   Filler
 );
 
@@ -42,11 +41,14 @@ const Dashboard = ({ transactions }) => {
   const [selectedView, setSelectedView] = useState('withinYear');
   const [selectedYear, setSelectedYear] = useState(currentYear.toString());
   const [selectedMonth, setSelectedMonth] = useState(currentMonth.toString());
-  const [chartType, setChartType] = useState('line'); // line, bar, pie, doughnut, radar
+  const [chartType, setChartType] = useState('line'); // line, bar
   const [timeRange, setTimeRange] = useState('month'); // week, month, quarter, year
   const [showComparison, setShowComparison] = useState(false);
   const [selectedCategories, setSelectedCategories] = useState([]);
-  const [showTrends, setShowTrends] = useState(false);
+  
+  // Year comparison states
+  const [startYear, setStartYear] = useState((currentYear - 1).toString());
+  const [endYear, setEndYear] = useState(currentYear.toString());
 
   const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
@@ -77,11 +79,31 @@ const Dashboard = ({ transactions }) => {
     setSelectedMonth(e.target.value);
   };
 
+  const handleStartYearChange = (e) => {
+    setStartYear(e.target.value);
+  };
+
+  const handleEndYearChange = (e) => {
+    setEndYear(e.target.value);
+  };
+
   const yearlyTotals = transactions.reduce((acc, transaction) => {
     const year = new Date(transaction.date).getFullYear();
     acc[year] = (acc[year] || 0) + transaction.amount;
     return acc;
   }, {});
+
+  // Get available years from transactions
+  const getAvailableYears = () => {
+    const years = new Set();
+    transactions.forEach(transaction => {
+      const year = new Date(transaction.date).getFullYear();
+      years.add(year);
+    });
+    return Array.from(years).sort((a, b) => b - a); // Sort descending
+  };
+
+  const availableYears = getAvailableYears();
 
   const monthlyTotalsForYear = (year) => {
     const monthly = {};
@@ -126,7 +148,16 @@ const Dashboard = ({ transactions }) => {
     : 0;  // Chart options based on theme
   const getChartOptions = () => {
     return {
+      responsive: true,
       maintainAspectRatio: false,
+      interaction: {
+        mode: 'index',
+        intersect: false,
+      },
+      hover: {
+        mode: 'index',
+        intersect: false,
+      },
       scales: {
         x: {
           ticks: {
@@ -166,7 +197,11 @@ const Dashboard = ({ transactions }) => {
           }
         },
         tooltip: {
-          backgroundColor: theme === 'dark' ? 'rgba(42, 42, 66, 0.9)' : 'rgba(255, 255, 255, 0.9)',
+          enabled: true,
+          mode: 'index',
+          intersect: false,
+          position: 'nearest',
+          backgroundColor: theme === 'dark' ? 'rgba(42, 42, 66, 0.95)' : 'rgba(255, 255, 255, 0.95)',
           titleColor: theme === 'dark' ? '#e6a070' : '#7f4c47',
           bodyColor: theme === 'dark' ? '#e6e6e6' : '#333',
           borderColor: theme === 'dark' ? '#444460' : '#ddd',
@@ -180,7 +215,31 @@ const Dashboard = ({ transactions }) => {
             size: 14
           },
           displayColors: true,
-          boxPadding: 5
+          boxPadding: 5,
+          cornerRadius: 8,
+          caretSize: 8,
+          caretPadding: 10,
+          animation: {
+            duration: 200
+          },
+          external: function(context) {
+            // Custom tooltip positioning if needed
+            const tooltipEl = context.tooltip;
+            if (tooltipEl.opacity === 0) {
+              return;
+            }
+            // Ensure tooltip is visible
+            if (tooltipEl.dataPoints && tooltipEl.dataPoints.length > 0) {
+              tooltipEl.displayColors = true;
+            }
+          },
+          callbacks: {
+            label: function(context) {
+              const label = context.dataset.label || '';
+              const value = context.parsed.y;
+              return label + ': ₹' + (typeof value === 'number' ? value.toLocaleString() : value);
+            }
+          }
         }
       }
     };
@@ -189,7 +248,16 @@ const Dashboard = ({ transactions }) => {
   // Pie chart options
   const getPieOptions = () => {
     return {
+      responsive: true,
       maintainAspectRatio: false,
+      interaction: {
+        mode: 'point',
+        intersect: true,
+      },
+      hover: {
+        mode: 'point',
+        intersect: true,
+      },
       plugins: {
         legend: {
           position: 'right',
@@ -203,7 +271,8 @@ const Dashboard = ({ transactions }) => {
           }
         },
         tooltip: {
-          backgroundColor: theme === 'dark' ? 'rgba(42, 42, 66, 0.9)' : 'rgba(255, 255, 255, 0.9)',
+          enabled: true,
+          backgroundColor: theme === 'dark' ? 'rgba(42, 42, 66, 0.95)' : 'rgba(255, 255, 255, 0.95)',
           titleColor: theme === 'dark' ? '#e6a070' : '#7f4c47',
           bodyColor: theme === 'dark' ? '#e6e6e6' : '#333',
           borderColor: theme === 'dark' ? '#444460' : '#ddd',
@@ -215,6 +284,18 @@ const Dashboard = ({ transactions }) => {
           },
           bodyFont: {
             size: 14
+          },
+          cornerRadius: 8,
+          caretSize: 8,
+          caretPadding: 10,
+          callbacks: {
+            label: function(context) {
+              const label = context.label || '';
+              const value = context.parsed;
+              const total = context.dataset.data.reduce((a, b) => a + b, 0);
+              const percentage = ((value / total) * 100).toFixed(1);
+              return label + ': ₹' + value.toLocaleString() + ' (' + percentage + '%)';
+            }
           }
         }
       }
@@ -329,38 +410,6 @@ const Dashboard = ({ transactions }) => {
       .sort(([,a], [,b]) => b - a)
       .slice(0, limit)
       .reduce((obj, [key, value]) => ({ ...obj, [key]: value }), {});
-  };
-
-  // Get spending trends (compare current period with previous)
-  const getSpendingTrends = () => {
-    const currentMonth = new Date().getMonth();
-    const currentYear = new Date().getFullYear();
-    const lastMonth = currentMonth === 0 ? 11 : currentMonth - 1;
-    const lastMonthYear = currentMonth === 0 ? currentYear - 1 : currentYear;
-
-    const currentMonthSpending = transactions
-      .filter(t => {
-        const date = new Date(t.date);
-        return date.getMonth() === currentMonth && date.getFullYear() === currentYear;
-      })
-      .reduce((sum, t) => sum + t.amount, 0);
-
-    const lastMonthSpending = transactions
-      .filter(t => {
-        const date = new Date(t.date);
-        return date.getMonth() === lastMonth && date.getFullYear() === lastMonthYear;
-      })
-      .reduce((sum, t) => sum + t.amount, 0);
-
-    const percentageChange = lastMonthSpending > 0 
-      ? ((currentMonthSpending - lastMonthSpending) / lastMonthSpending) * 100 
-      : 0;
-
-    return {
-      current: currentMonthSpending,
-      previous: lastMonthSpending,
-      change: percentageChange
-    };
   };
 
   // Advanced Financial Metrics
@@ -506,52 +555,37 @@ const Dashboard = ({ transactions }) => {
     const baseData = {
       labels,
       datasets: [{
+        label: 'Amount Spent',
         data,
-        backgroundColor: colors,
-        borderColor: theme === 'dark' ? '#2a2a42' : '#fff',
+        backgroundColor: colors.map(color => color + '80'),
+        borderColor: colors[0],
         borderWidth: 2,
-        hoverBorderWidth: 3,
-        hoverOffset: 10,
+        fill: chartType === 'line' ? false : true,
       }]
     };
 
-    switch (chartType) {
-      case 'bar':
-        return {
-          ...baseData,
-          datasets: [{
-            ...baseData.datasets[0],
-            label: 'Amount Spent',
-            backgroundColor: colors.map(color => color + '80'),
-            borderColor: colors,
-          }]
-        };
-      case 'doughnut':
-        return {
-          ...baseData,
-          datasets: [{
-            ...baseData.datasets[0],
-            cutout: '60%',
-          }]
-        };
-      case 'radar':
-        return {
-          ...baseData,
-          datasets: [{
-            label: 'Spending by Category',
-            data,
-            backgroundColor: colors[0] + '20',
-            borderColor: colors[0],
-            borderWidth: 2,
-            pointBackgroundColor: colors[0],
-            pointBorderColor: '#fff',
-            pointHoverBackgroundColor: '#fff',
-            pointHoverBorderColor: colors[0],
-          }]
-        };
-      default:
-        return baseData;
+    if (chartType === 'bar') {
+      return {
+        ...baseData,
+        datasets: [{
+          ...baseData.datasets[0],
+          backgroundColor: colors.map(color => color + '80'),
+          borderColor: colors,
+        }]
+      };
     }
+
+    // Default to line chart
+    return {
+      ...baseData,
+      datasets: [{
+        ...baseData.datasets[0],
+        backgroundColor: colors[0] + '20',
+        borderColor: colors[0],
+        fill: true,
+        tension: 0.3,
+      }]
+    };
   };
 
   const getPaymentMethodChart = () => {
@@ -560,15 +594,38 @@ const Dashboard = ({ transactions }) => {
     const data = Object.values(paymentTotals);
     const colors = getChartColors(labels.length);
 
-    return {
+    const baseData = {
       labels,
       datasets: [{
+        label: 'Amount Spent',
         data,
-        backgroundColor: colors,
-        borderColor: theme === 'dark' ? '#2a2a42' : '#fff',
+        backgroundColor: colors.map(color => color + '80'),
+        borderColor: colors[0],
         borderWidth: 2,
-        hoverBorderWidth: 3,
-        hoverOffset: 10,
+        fill: chartType === 'line' ? true : false,
+      }]
+    };
+
+    if (chartType === 'bar') {
+      return {
+        ...baseData,
+        datasets: [{
+          ...baseData.datasets[0],
+          backgroundColor: colors.map(color => color + '80'),
+          borderColor: colors,
+        }]
+      };
+    }
+
+    // Default to line chart
+    return {
+      ...baseData,
+      datasets: [{
+        ...baseData.datasets[0],
+        backgroundColor: colors[0] + '20',
+        borderColor: colors[0],
+        fill: true,
+        tension: 0.3,
       }]
     };
   };
@@ -619,16 +676,23 @@ const Dashboard = ({ transactions }) => {
   };
 
   const getComparisonChart = () => {
-    const currentYear = new Date().getFullYear();
-    const lastYear = currentYear - 1;
+    const startYearInt = parseInt(startYear);
+    const endYearInt = parseInt(endYear);
     
-    const currentYearData = months.map((_, index) => {
-      const monthData = monthlyTotalsForYear(currentYear.toString())[index] || 0;
+    if (!startYear || !endYear || startYearInt >= endYearInt) {
+      return {
+        labels: months,
+        datasets: []
+      };
+    }
+    
+    const startYearData = months.map((_, index) => {
+      const monthData = monthlyTotalsForYear(startYear)[index] || 0;
       return monthData;
     });
     
-    const lastYearData = months.map((_, index) => {
-      const monthData = monthlyTotalsForYear(lastYear.toString())[index] || 0;
+    const endYearData = months.map((_, index) => {
+      const monthData = monthlyTotalsForYear(endYear)[index] || 0;
       return monthData;
     });
 
@@ -638,8 +702,8 @@ const Dashboard = ({ transactions }) => {
       labels: months,
       datasets: [
         {
-          label: currentYear.toString(),
-          data: currentYearData,
+          label: startYear,
+          data: startYearData,
           backgroundColor: colors[0] + '40',
           borderColor: colors[0],
           borderWidth: 2,
@@ -647,8 +711,8 @@ const Dashboard = ({ transactions }) => {
           tension: 0.3,
         },
         {
-          label: lastYear.toString(),
-          data: lastYearData,
+          label: endYear,
+          data: endYearData,
           backgroundColor: colors[1] + '40',
           borderColor: colors[1],
           borderWidth: 2,
@@ -673,10 +737,10 @@ const Dashboard = ({ transactions }) => {
         label: 'Seasonal Spending',
         data,
         backgroundColor: colors.map(color => color + '40'),
-        borderColor: colors,
+        borderColor: colors[0],
         borderWidth: 2,
-        hoverBorderWidth: 3,
-        hoverOffset: 10,
+        fill: chartType === 'line' ? true : false,
+        tension: chartType === 'line' ? 0.3 : 0,
       }]
     };
   };
@@ -713,7 +777,6 @@ const Dashboard = ({ transactions }) => {
               <option value="yearly">Yearly Progress</option>
               <option value="withinYear">Within Year</option>
               <option value="comparison">Year Comparison</option>
-              <option value="trends">Trends & Insights</option>
               <option value="advanced">Advanced Analytics</option>
             </select>
           </div>
@@ -723,9 +786,6 @@ const Dashboard = ({ transactions }) => {
             <select value={chartType} onChange={(e) => setChartType(e.target.value)}>
               <option value="line">Line Chart</option>
               <option value="bar">Bar Chart</option>
-              <option value="pie">Pie Chart</option>
-              <option value="doughnut">Doughnut Chart</option>
-              <option value="radar">Radar Chart</option>
             </select>
           </div>
         </div>
@@ -767,7 +827,7 @@ const Dashboard = ({ transactions }) => {
           <div className="card-content">
             <h3>Monthly Forecast</h3>
             <p>₹{getExpenseForecast().nextMonth.toLocaleString()}</p>
-            <small>Based on recent trends</small>
+            <small>Based on historical data</small>
           </div>
         </div>
       </div>
@@ -799,7 +859,11 @@ const Dashboard = ({ transactions }) => {
             <div className="chart-card">
               <h3>Seasonal Spending Patterns</h3>
               <div className="chart-wrapper">
-                <Doughnut data={getSeasonalChart()} options={getPieOptions()} />
+                {chartType === 'bar' ? (
+                  <Bar data={getSeasonalChart()} options={getChartOptions()} />
+                ) : (
+                  <Line data={getSeasonalChart()} options={getChartOptions()} />
+                )}
               </div>
             </div>
             
@@ -836,12 +900,8 @@ const Dashboard = ({ transactions }) => {
               <div className="chart-wrapper">
                 {chartType === 'bar' ? (
                   <Bar data={getEnhancedCategoryChart()} options={getChartOptions()} />
-                ) : chartType === 'doughnut' ? (
-                  <Doughnut data={getEnhancedCategoryChart()} options={getPieOptions()} />
-                ) : chartType === 'radar' ? (
-                  <Radar data={getEnhancedCategoryChart()} options={getChartOptions()} />
                 ) : (
-                  <Pie data={getEnhancedCategoryChart()} options={getPieOptions()} />
+                  <Line data={getEnhancedCategoryChart()} options={getChartOptions()} />
                 )}
               </div>
             </div>
@@ -849,7 +909,11 @@ const Dashboard = ({ transactions }) => {
             <div className="chart-card">
               <h3>Payment Methods</h3>
               <div className="chart-wrapper">
-                <Doughnut data={getPaymentMethodChart()} options={getPieOptions()} />
+                {chartType === 'bar' ? (
+                  <Bar data={getPaymentMethodChart()} options={getChartOptions()} />
+                ) : (
+                  <Line data={getPaymentMethodChart()} options={getChartOptions()} />
+                )}
               </div>
             </div>
             
@@ -882,37 +946,110 @@ const Dashboard = ({ transactions }) => {
       {/* Year Comparison */}
       {selectedView === 'comparison' && (
         <div className="comparison-view">
-          <div className="chart-card">
+          {/* Year Selection for Comparison */}
+          <div className="comparison-header">
             <h3>Year-over-Year Comparison</h3>
-            <div className="chart-wrapper">
-              <Line data={getComparisonChart()} options={getChartOptions()} />
+            <p>Select two years to compare your spending patterns and track financial progress.</p>
+          </div>
+          
+          {availableYears.length === 0 ? (
+            <div className="no-data-message">
+              <span className="info-icon">📊</span>
+              <span>No transaction data available for comparison. Start adding transactions to see year-over-year analysis.</span>
+            </div>
+          ) : availableYears.length === 1 ? (
+            <div className="no-data-message">
+              <span className="info-icon">📈</span>
+              <span>You have transactions for {availableYears[0]} only. Add transactions for another year to enable comparison.</span>
+            </div>
+          ) : (
+            <>
+              <div className="comparison-selectors">
+            <div className="selector-group">
+              <label>Start Year:</label>
+              <select
+                className="year-input"
+                value={startYear}
+                onChange={handleStartYearChange}
+              >
+                <option value="">Select Start Year</option>
+                {availableYears.map(year => (
+                  <option key={year} value={year}>{year}</option>
+                ))}
+              </select>
+            </div>
+            
+            <div className="selector-group">
+              <label>End Year:</label>
+              <select
+                className="year-input"
+                value={endYear}
+                onChange={handleEndYearChange}
+              >
+                <option value="">Select End Year</option>
+                {availableYears.map(year => (
+                  <option key={year} value={year}>{year}</option>
+                ))}
+              </select>
             </div>
           </div>
-        </div>
-      )}
-
-      {/* Trends & Insights */}
-      {selectedView === 'trends' && (
-        <div className="trends-view">
-          <div className="insights-cards">
-            <div className="insight-card">
-              <h3>Spending Trend</h3>
-              <div className="trend-indicator">
-                {(() => {
-                  const trends = getSpendingTrends();
-                  const isUp = trends.change > 0;
-                  return (
-                    <div className={`trend ${isUp ? 'up' : 'down'}`}>
-                      <span className="trend-icon">{isUp ? '📈' : '📉'}</span>
-                      <span className="trend-text">
-                        {Math.abs(trends.change).toFixed(1)}% {isUp ? 'increase' : 'decrease'}
-                      </span>
-                    </div>
-                  );
-                })()}
+          
+          {/* Validation Message */}
+          {startYear && endYear && parseInt(startYear) >= parseInt(endYear) && (
+            <div className="validation-message">
+              <span className="error-icon">⚠️</span>
+              <span>Start year must be less than end year for comparison.</span>
+            </div>
+          )}
+          
+          {/* Comparison Summary */}
+          {startYear && endYear && parseInt(startYear) < parseInt(endYear) && (
+            <div className="comparison-summary">
+              <div className="summary-item">
+                <span className="label">{startYear} Total:</span>
+                <span className="value">₹{Object.values(monthlyTotalsForYear(startYear)).reduce((sum, val) => sum + val, 0).toLocaleString()}</span>
+              </div>
+              <div className="summary-item">
+                <span className="label">{endYear} Total:</span>
+                <span className="value">₹{Object.values(monthlyTotalsForYear(endYear)).reduce((sum, val) => sum + val, 0).toLocaleString()}</span>
+              </div>
+              <div className="summary-item">
+                <span className="label">Difference:</span>
+                <span className={`value ${Object.values(monthlyTotalsForYear(endYear)).reduce((sum, val) => sum + val, 0) - Object.values(monthlyTotalsForYear(startYear)).reduce((sum, val) => sum + val, 0) >= 0 ? 'negative' : 'positive'}`}>
+                  {Object.values(monthlyTotalsForYear(endYear)).reduce((sum, val) => sum + val, 0) - Object.values(monthlyTotalsForYear(startYear)).reduce((sum, val) => sum + val, 0) >= 0 ? '+' : ''}₹{Math.abs(Object.values(monthlyTotalsForYear(endYear)).reduce((sum, val) => sum + val, 0) - Object.values(monthlyTotalsForYear(startYear)).reduce((sum, val) => sum + val, 0)).toLocaleString()}
+                </span>
+              </div>
+              <div className="summary-item">
+                <span className="label">Change:</span>
+                <span className={`value ${(() => {
+                  const startTotal = Object.values(monthlyTotalsForYear(startYear)).reduce((sum, val) => sum + val, 0);
+                  const endTotal = Object.values(monthlyTotalsForYear(endYear)).reduce((sum, val) => sum + val, 0);
+                  const change = startTotal > 0 ? ((endTotal - startTotal) / startTotal) * 100 : 0;
+                  return change >= 0 ? 'negative' : 'positive';
+                })()}`}>
+                  {(() => {
+                    const startTotal = Object.values(monthlyTotalsForYear(startYear)).reduce((sum, val) => sum + val, 0);
+                    const endTotal = Object.values(monthlyTotalsForYear(endYear)).reduce((sum, val) => sum + val, 0);
+                    const change = startTotal > 0 ? ((endTotal - startTotal) / startTotal) * 100 : 0;
+                    return `${change >= 0 ? '+' : ''}${change.toFixed(1)}%`;
+                  })()}
+                </span>
               </div>
             </div>
+          )}
+          
+          <div className="chart-card">
+            <h3>Year-over-Year Comparison: {startYear} vs {endYear}</h3>
+            <div className="chart-wrapper">
+              {chartType === 'bar' ? (
+                <Bar data={getComparisonChart()} options={getChartOptions()} />
+              ) : (
+                <Line data={getComparisonChart()} options={getChartOptions()} />
+              )}
+            </div>
           </div>
+            </>
+          )}
         </div>
       )}
 
@@ -986,12 +1123,8 @@ const Dashboard = ({ transactions }) => {
                     <div className="chart-wrapper">
                       {chartType === 'bar' ? (
                         <Bar data={getEnhancedCategoryChart()} options={getChartOptions()} />
-                      ) : chartType === 'doughnut' ? (
-                        <Doughnut data={getEnhancedCategoryChart()} options={getPieOptions()} />
-                      ) : chartType === 'radar' ? (
-                        <Radar data={getEnhancedCategoryChart()} options={getChartOptions()} />
                       ) : (
-                        <Pie data={getEnhancedCategoryChart()} options={getPieOptions()} />
+                        <Line data={getEnhancedCategoryChart()} options={getChartOptions()} />
                       )}
                     </div>
                   </div>
