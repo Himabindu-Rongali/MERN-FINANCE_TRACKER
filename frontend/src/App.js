@@ -6,6 +6,9 @@ import TransactionForm from './components/TransactionForm';
 import TransactionList from './components/TransactionList';
 import Dashboard from './components/Dashboard';
 import IncomeList from './components/IncomeList';
+import FinancialReports from './components/FinancialReports';
+import AdvancedAnalytics from './components/AdvancedAnalytics';
+import PredictiveAnalytics from './components/PredictiveAnalytics';
 import ThemeToggle from './components/ThemeToggle';
 import { ThemeProvider, ThemeContext } from './components/ThemeContext';
 import Login from './components/Login';
@@ -29,6 +32,7 @@ const PrivateRoute = ({ children }) => {
 
 const AppContent = () => {
   const [transactions, setTransactions] = useState([]);
+  const [incomes, setIncomes] = useState([]);
   const [successMessage, setSuccessMessage] = useState('');
   const { theme } = useContext(ThemeContext);
   const { isAuthenticated, token } = useContext(AuthContext);
@@ -40,6 +44,16 @@ const AppContent = () => {
     } catch (error) {
       console.error('Error fetching transactions:', error);
       setTransactions([]);
+    }
+  };
+
+  const fetchIncomes = async () => {
+    try {
+      const res = await axios.get('http://localhost:5000/api/income');
+      setIncomes(res.data);
+    } catch (error) {
+      console.error('Error fetching incomes:', error);
+      setIncomes([]);
     }
   };
 
@@ -61,8 +75,10 @@ const AppContent = () => {
   useEffect(() => {
     if (token) {
       fetchTransactions();
+      fetchIncomes();
     } else {
       setTransactions([]);
+      setIncomes([]);
     }
   }, [token]);
 
@@ -76,7 +92,10 @@ const AppContent = () => {
               <>
                 <Link to="/transactions" className="nav-link">Transactions</Link>
                 <Link to="/dashboard" className="nav-link">Dashboard</Link>
+                <Link to="/analytics" className="nav-link">Analytics</Link>
+                <Link to="/ai-insights" className="nav-link">AI Insights</Link>
                 <Link to="/income" className="nav-link">Income</Link>
+                <Link to="/reports" className="nav-link">Reports</Link>
               </>
             )}
           </div>
@@ -140,6 +159,30 @@ const AppContent = () => {
           element={
             <PrivateRoute>
               <IncomeList />
+            </PrivateRoute>
+          } 
+        />
+        <Route 
+          path="/analytics" 
+          element={
+            <PrivateRoute>
+              <AdvancedAnalytics transactions={transactions} incomes={incomes} />
+            </PrivateRoute>
+          } 
+        />
+        <Route 
+          path="/ai-insights" 
+          element={
+            <PrivateRoute>
+              <PredictiveAnalytics transactions={transactions} incomes={incomes} />
+            </PrivateRoute>
+          } 
+        />
+        <Route 
+          path="/reports" 
+          element={
+            <PrivateRoute>
+              <FinancialReports />
             </PrivateRoute>
           } 
         />

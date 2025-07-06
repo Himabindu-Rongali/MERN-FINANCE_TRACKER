@@ -12,6 +12,9 @@ const TransactionForm = ({ refreshTransactions, handleAddTransaction }) => {
   const [paymentMethod, setPaymentMethod] = useState('');  // State for payment method
   const [file, setFile] = useState(null);
   const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState('');
+  const [extractionSuccess, setExtractionSuccess] = useState(false);
+  const [isDragOver, setIsDragOver] = useState(false);
   const { theme } = useContext(ThemeContext);
   const navigate = useNavigate();
 
@@ -40,14 +43,20 @@ const TransactionForm = ({ refreshTransactions, handleAddTransaction }) => {
   const handleFileUpload = async (e) => {
     const uploadedFile = e.target.files[0];
     if (!uploadedFile) return;
+    
     setFile(uploadedFile);
     setUploading(true);
+    setUploadError('');
+    setExtractionSuccess(false);
+    
     const formData = new FormData();
     formData.append('file', uploadedFile);
+    
     try {
       const res = await axios.post('http://localhost:5000/transactions/upload/upload-image', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
+      
       // The backend now returns only the extracted fields, not a saved transaction
       const extractedData = res.data;
       setAmount(extractedData.amount || '');
@@ -75,14 +84,72 @@ const TransactionForm = ({ refreshTransactions, handleAddTransaction }) => {
       setDate(parsedDate);
       setDescription(extractedData.description || '');
       setPaymentMethod(extractedData.paymentMethod || '');
+      
+      setExtractionSuccess(true);
+      setTimeout(() => setExtractionSuccess(false), 5000);
 
       // Do not call handleAddTransaction or refreshTransactions here
       // The user will review and click "Add Transaction" to save
 
     } catch (err) {
-      alert('Failed to extract transaction from document.');
+      setUploadError(err.response?.data?.message || 'Failed to extract transaction from document.');
+      setTimeout(() => setUploadError(''), 5000);
     }
     setUploading(false);
+  };
+
+  // Handle drag and drop
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    setIsDragOver(true);
+  };
+
+  const handleDragLeave = (e) => {
+    e.preventDefault();
+    setIsDragOver(false);
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    setIsDragOver(false);
+    
+    const files = e.dataTransfer.files;
+    if (files.length > 0) {
+      const file = files[0];
+      if (file.type.startsWith('image/') || file.type === 'application/pdf') {
+        // Create a synthetic event to reuse the existing upload logic
+        const syntheticEvent = {
+          target: {
+            files: [file]
+          }
+        };
+        handleFileUpload(syntheticEvent);
+      } else {
+        setUploadError('Please upload only images or PDF files.');
+        setTimeout(() => setUploadError(''), 5000);
+      }
+    }
+  };
+
+  // Remove file
+  const handleRemoveFile = () => {
+    setFile(null);
+    setExtractionSuccess(false);
+    setUploadError('');
+    // Clear the file input
+    const fileInput = document.querySelector('.file-upload-input');
+    if (fileInput) {
+      fileInput.value = '';
+    }
+  };
+
+  // Format file size
+  const formatFileSize = (bytes) => {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   };
 
   return (
@@ -101,17 +168,78 @@ const TransactionForm = ({ refreshTransactions, handleAddTransaction }) => {
       </span>
       <h2 className="form-section-title">Add New Transaction</h2>
       <form onSubmit={handleSubmit} className="transaction-form">
-        {/* File upload for OCR */}
-        <label>
-          Upload Transaction Document (Image or PDF):
+        {/* Enhanced File upload for OCR */}
+        <div 
+          className={`file-upload-container ${isDragOver ? 'drag-over' : ''}`}
+          onDragOver={handleDragOver}
+          onDragLeave={handleDragLeave}
+          onDrop={handleDrop}
+        >
+          <div className="file-upload-icon">📄</div>
+          <div className="file-upload-text">
+            {file ? 'Change Document' : 'Upload Receipt or Document'}
+          </div>
+          <div className="file-upload-subtext">
+            Drag & drop or click to browse • Images & PDFs • Max 10MB
+          </div>
           <input 
             type="file" 
             accept="image/*,.pdf" 
             onChange={handleFileUpload} 
-            disabled={uploading} 
+            disabled={uploading}
+            className="file-upload-input"
           />
-        </label>
-        {uploading && <div>Extracting data from document...</div>}
+          {!file && (
+            <div className="file-upload-button">
+              Choose File
+            </div>
+          )}
+        </div>
+
+        {/* File Preview */}
+        {file && !uploading && (
+          <div className="file-preview">
+            <div className="file-preview-icon">
+              {file.type.startsWith('image/') ? '🖼️' : '📄'}
+            </div>
+            <div className="file-preview-info">
+              <div className="file-preview-name">{file.name}</div>
+              <div className="file-preview-size">{formatFileSize(file.size)}</div>
+            </div>
+            <button 
+              type="button" 
+              onClick={handleRemoveFile}
+              className="file-preview-remove"
+              title="Remove file"
+            >
+              ×
+            </button>
+          </div>
+        )}
+
+        {/* Upload Progress */}
+        {uploading && (
+          <div className="upload-progress">
+            <div className="upload-spinner"></div>
+            <div>Extracting transaction data from document...</div>
+          </div>
+        )}
+
+        {/* Success Message */}
+        {extractionSuccess && (
+          <div className="extraction-success">
+            <div>✅</div>
+            <div>Transaction data extracted successfully! Please review and confirm the details below.</div>
+          </div>
+        )}
+
+        {/* Error Message */}
+        {uploadError && (
+          <div className="upload-error">
+            <div>❌</div>
+            <div>{uploadError}</div>
+          </div>
+        )}
 
         <label>
           Amount:

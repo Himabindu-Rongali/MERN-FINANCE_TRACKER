@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>File Upload Test - SmartFinance</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #333;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            max-width: 500px;
+            width: 90%;
+        }
+        
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 2rem;
+        }
+        
+        .upload-zone {
+            border: 3px dashed #667eea;
+            border-radius: 15px;
+            padding: 40px;
+            text-align: center;
+            background: #f8f9ff;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .upload-zone:hover {
+            border-color: #764ba2;
+            background: #f0f2ff;
+            transform: translateY(-2px);
+        }
+        
+        .upload-zone.dragover {
+            border-color: #4CAF50;
+            background: #e8f5e8;
+        }
+        
+        .upload-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            color: #667eea;
+        }
+        
+        .upload-text {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .upload-subtext {
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 20px;
+        }
+        
+        .file-input {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+        }
+        
+        .upload-btn {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+        
+        .upload-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        .file-preview {
+            margin-top: 20px;
+            padding: 20px;
+            background: #f8f9ff;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+            display: none;
+        }
+        
+        .file-preview.show {
+            display: block;
+        }
+        
+        .file-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .file-icon {
+            font-size: 2rem;
+        }
+        
+        .file-details h3 {
+            margin: 0 0 5px 0;
+            color: #333;
+        }
+        
+        .file-details p {
+            margin: 0;
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        .remove-btn {
+            background: #ff4757;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 15px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            margin-left: auto;
+        }
+        
+        .remove-btn:hover {
+            background: #ff3742;
+        }
+        
+        .upload-progress {
+            margin-top: 20px;
+            padding: 20px;
+            background: #e8f5e8;
+            border-radius: 10px;
+            border-left: 4px solid #4CAF50;
+            display: none;
+        }
+        
+        .upload-progress.show {
+            display: block;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #ddd;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(45deg, #4CAF50, #45a049);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        
+        .result {
+            margin-top: 20px;
+            padding: 20px;
+            border-radius: 10px;
+            display: none;
+        }
+        
+        .result.success {
+            background: #e8f5e8;
+            border-left: 4px solid #4CAF50;
+            color: #2e7d32;
+        }
+        
+        .result.error {
+            background: #ffebee;
+            border-left: 4px solid #f44336;
+            color: #c62828;
+        }
+        
+        .result.show {
+            display: block;
+        }
+        
+        .extracted-data {
+            margin-top: 15px;
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+        }
+        
+        .data-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .data-item:last-child {
+            margin-bottom: 0;
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+        
+        .data-label {
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .data-value {
+            color: #666;
+            text-align: right;
+        }
+        
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+            }
+            
+            .upload-zone {
+                padding: 20px;
+            }
+            
+            .upload-icon {
+                font-size: 3rem;
+            }
+            
+            .upload-text {
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📄 Upload Receipt Test</h1>
+        
+        <div class="upload-zone" id="uploadZone">
+            <div class="upload-icon">📋</div>
+            <div class="upload-text">Upload Receipt or Document</div>
+            <div class="upload-subtext">Drag & drop or click to browse<br>Images & PDFs • Max 10MB</div>
+            <input type="file" class="file-input" id="fileInput" accept="image/*,.pdf">
+            <button class="upload-btn" type="button">Choose File</button>
+        </div>
+        
+        <div class="file-preview" id="filePreview">
+            <div class="file-info">
+                <div class="file-icon" id="fileIcon">📄</div>
+                <div class="file-details">
+                    <h3 id="fileName">document.pdf</h3>
+                    <p id="fileSize">2.5 MB</p>
+                </div>
+                <button class="remove-btn" id="removeBtn">Remove</button>
+            </div>
+        </div>
+        
+        <div class="upload-progress" id="uploadProgress">
+            <div>🔄 Extracting transaction data...</div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+        </div>
+        
+        <div class="result" id="result">
+            <div id="resultMessage"></div>
+            <div class="extracted-data" id="extractedData" style="display: none;"></div>
+        </div>
+    </div>
+
+    <script>
+        const uploadZone = document.getElementById('uploadZone');
+        const fileInput = document.getElementById('fileInput');
+        const filePreview = document.getElementById('filePreview');
+        const uploadProgress = document.getElementById('uploadProgress');
+        const result = document.getElementById('result');
+        const progressFill = document.getElementById('progressFill');
+        
+        let selectedFile = null;
+        
+        // File input change handler
+        fileInput.addEventListener('change', handleFileSelect);
+        
+        // Drag and drop handlers
+        uploadZone.addEventListener('dragover', handleDragOver);
+        uploadZone.addEventListener('dragleave', handleDragLeave);
+        uploadZone.addEventListener('drop', handleDrop);
+        
+        // Remove file handler
+        document.getElementById('removeBtn').addEventListener('click', removeFile);
+        
+        function handleFileSelect(e) {
+            const file = e.target.files[0];
+            if (file) {
+                selectedFile = file;
+                showFilePreview(file);
+                uploadFile(file);
+            }
+        }
+        
+        function handleDragOver(e) {
+            e.preventDefault();
+            uploadZone.classList.add('dragover');
+        }
+        
+        function handleDragLeave(e) {
+            e.preventDefault();
+            uploadZone.classList.remove('dragover');
+        }
+        
+        function handleDrop(e) {
+            e.preventDefault();
+            uploadZone.classList.remove('dragover');
+            
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                const file = files[0];
+                if (file.type.startsWith('image/') || file.type === 'application/pdf') {
+                    selectedFile = file;
+                    showFilePreview(file);
+                    uploadFile(file);
+                } else {
+                    showResult('Please upload only images or PDF files.', 'error');
+                }
+            }
+        }
+        
+        function showFilePreview(file) {
+            const fileName = document.getElementById('fileName');
+            const fileSize = document.getElementById('fileSize');
+            const fileIcon = document.getElementById('fileIcon');
+            
+            fileName.textContent = file.name;
+            fileSize.textContent = formatFileSize(file.size);
+            fileIcon.textContent = file.type.startsWith('image/') ? '🖼️' : '📄';
+            
+            filePreview.classList.add('show');
+            result.classList.remove('show');
+        }
+        
+        function removeFile() {
+            selectedFile = null;
+            fileInput.value = '';
+            filePreview.classList.remove('show');
+            uploadProgress.classList.remove('show');
+            result.classList.remove('show');
+        }
+        
+        function uploadFile(file) {
+            const formData = new FormData();
+            formData.append('file', file);
+            
+            // Show progress
+            uploadProgress.classList.add('show');
+            result.classList.remove('show');
+            
+            // Simulate progress
+            let progress = 0;
+            const progressInterval = setInterval(() => {
+                progress += Math.random() * 30;
+                if (progress > 90) progress = 90;
+                progressFill.style.width = progress + '%';
+            }, 100);
+            
+            // Make API call
+            fetch('http://localhost:5000/transactions/upload/upload-image', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                clearInterval(progressInterval);
+                progressFill.style.width = '100%';
+                
+                setTimeout(() => {
+                    uploadProgress.classList.remove('show');
+                    if (data.amount) {
+                        showResult('Transaction data extracted successfully!', 'success', data);
+                    } else {
+                        showResult(data.message || 'Failed to extract transaction data.', 'error');
+                    }
+                }, 500);
+            })
+            .catch(error => {
+                clearInterval(progressInterval);
+                uploadProgress.classList.remove('show');
+                showResult('Error uploading file: ' + error.message, 'error');
+            });
+        }
+        
+        function showResult(message, type, data = null) {
+            const resultDiv = document.getElementById('result');
+            const resultMessage = document.getElementById('resultMessage');
+            const extractedData = document.getElementById('extractedData');
+            
+            resultMessage.textContent = message;
+            resultDiv.className = 'result show ' + type;
+            
+            if (data && type === 'success') {
+                let dataHTML = '';
+                if (data.amount) dataHTML += `<div class="data-item"><span class="data-label">Amount:</span><span class="data-value">₹${data.amount}</span></div>`;
+                if (data.category) dataHTML += `<div class="data-item"><span class="data-label">Category:</span><span class="data-value">${data.category}</span></div>`;
+                if (data.date) dataHTML += `<div class="data-item"><span class="data-label">Date:</span><span class="data-value">${data.date}</span></div>`;
+                if (data.paymentType) dataHTML += `<div class="data-item"><span class="data-label">Payment Type:</span><span class="data-value">${data.paymentType}</span></div>`;
+                if (data.description) dataHTML += `<div class="data-item"><span class="data-label">Description:</span><span class="data-value">${data.description}</span></div>`;
+                
+                if (dataHTML) {
+                    extractedData.innerHTML = dataHTML;
+                    extractedData.style.display = 'block';
+                } else {
+                    extractedData.style.display = 'none';
+                }
+            } else {
+                extractedData.style.display = 'none';
+            }
+        }
+        
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+    </script>
+</body>
+</html>
